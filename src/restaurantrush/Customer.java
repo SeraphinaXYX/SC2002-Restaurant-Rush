@@ -37,6 +37,13 @@ public abstract class Customer {
 
     public abstract String getTypeLabel();
 
+    /**
+     * Called right after the dish is served. Does nothing by default; a
+     * subclass can react to how long the food took.
+     */
+    public void onServed(int waitTurns) {
+    }
+
     /** Default ordering rule: a seeded random pick from the dishes. */
     protected OrderItem pickDefault(Menu menu, Random rng) {
         List<OrderItem> dishes = menu.getDishes();
@@ -73,8 +80,9 @@ public abstract class Customer {
         state = CustomerState.ORDERED;
     }
 
-    public void receiveDish() {
+    public void receiveDish(int waitTurns) {
         state = CustomerState.EATING;
+        onServed(waitTurns);
     }
 
     public void finishEating() {

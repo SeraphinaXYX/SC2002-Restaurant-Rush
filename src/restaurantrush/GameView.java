@@ -26,6 +26,28 @@ public class GameView {
         this.echoInput = echoInput;
     }
 
+    public int askStage(int maxStage) {
+        System.out.println("Which stage do you want to play?");
+        System.out.println("  1. Basic operation (Regular customers)");
+        System.out.println("  2. Customer behaviour (adds a VIP and a Critic)");
+        while (true) {
+            System.out.print("Stage (1-" + maxStage + ") > ");
+            String line = readLine();
+            if (line == null) {
+                return maxStage;
+            }
+            try {
+                int stage = Integer.parseInt(line);
+                if (stage >= 1 && stage <= maxStage) {
+                    return stage;
+                }
+            } catch (NumberFormatException ignored) {
+                // handled below
+            }
+            System.out.println("  ! Please enter a number from 1 to " + maxStage + ".");
+        }
+    }
+
     public long askSeed() {
         while (true) {
             System.out.print("Random seed (press Enter for 42) > ");
@@ -43,7 +65,7 @@ public class GameView {
 
     public void showIntro(GameConfig config, Menu menu) {
         System.out.println(LINE);
-        System.out.println("  RESTAURANT RUSH            (seed " + config.getSeed() + ")");
+        System.out.println("  RESTAURANT RUSH            (stage " + config.getStage() + ", seed " + config.getSeed() + ")");
         System.out.println(LINE);
         System.out.println("You are the manager: " + GameConfig.TABLE_COUNT + " tables, "
                 + GameConfig.MAX_TURNS + " turns, customers arrive on turns " + GameConfig.ARRIVAL_TURNS + ".");

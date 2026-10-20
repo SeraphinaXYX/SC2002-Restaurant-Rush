@@ -1,6 +1,10 @@
+Which stage do you want to play?
+  1. Basic operation (Regular customers)
+  2. Customer behaviour (adds a VIP and a Critic)
+Stage (1-2) > 1
 Random seed (press Enter for 42) > 42
 ========================================================================
-  RESTAURANT RUSH            (seed 42)
+  RESTAURANT RUSH            (stage 1, seed 42)
 ========================================================================
 You are the manager: 2 tables, 18 turns, customers arrive on turns [1, 4, 7, 10, 13, 16].
 To win: at least 4 paid customers, revenue at least $45.00 and average

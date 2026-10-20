@@ -61,9 +61,16 @@ public class Waiter extends Staff {
             }
             return ActionResult.fail(dish + " cannot be served, it is " + order.getStatus() + ".");
         }
+        Customer customer = order.getCustomer();
+        int before = customer.getSatisfaction();
         order.markServed(turn);
-        order.getCustomer().receiveDish();
-        return ActionResult.ok(getLabel() + " serves " + dish + ".");
+        customer.receiveDish(turn - order.getTurnPlaced());
+        String msg = getLabel() + " serves " + dish + ".";
+        if (customer.getSatisfaction() != before) {
+            msg += " " + customer.getName() + " reacts: satisfaction " + before + " -> "
+                    + customer.getSatisfaction() + ".";
+        }
+        return ActionResult.ok(msg);
     }
 
     private static String describePrice(OrderItem item, int price) {

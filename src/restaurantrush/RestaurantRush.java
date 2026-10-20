@@ -11,7 +11,8 @@ import java.util.Scanner;
 public class RestaurantRush {
     public static void main(String[] args) {
         GameView view = new GameView(new Scanner(System.in), Arrays.asList(args).contains("--echo"));
+        int stage = view.askStage(2);
         long seed = view.askSeed();
-        new GameController(new GameConfig(seed), view).run();
+        new GameController(new GameConfig(stage, seed), view).run();
     }
 }
