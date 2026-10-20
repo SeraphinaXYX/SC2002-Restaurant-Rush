@@ -85,10 +85,6 @@ public class Order {
         return status;
     }
 
-    public int getPrepDone() {
-        return prepDone;
-    }
-
     public int getTurnServed() {
         return turnServed;
     }

@@ -23,10 +23,6 @@ public class WaitingQueue {
         return customers.isEmpty();
     }
 
-    public int size() {
-        return customers.size();
-    }
-
     /** Returns a copy so callers cannot modify the queue directly. */
     public List<Customer> getAll() {
         return List.copyOf(customers);

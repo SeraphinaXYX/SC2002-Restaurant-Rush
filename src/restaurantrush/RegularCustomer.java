@@ -9,8 +9,8 @@ import java.util.Random;
  */
 public class RegularCustomer extends Customer {
 
-    public RegularCustomer(int id, int arrivalTurn) {
-        super(id, arrivalTurn);
+    public RegularCustomer(int id) {
+        super(id);
     }
 
     @Override

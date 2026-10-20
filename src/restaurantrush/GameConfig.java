@@ -53,11 +53,11 @@ public class GameConfig {
             return null;
         }
         if (stage >= 2 && turn == 7) {
-            return new VIPCustomer(id, turn);
+            return new VIPCustomer(id);
         }
         if (stage >= 2 && turn == 13) {
-            return new CriticCustomer(id, turn);
+            return new CriticCustomer(id);
         }
-        return new RegularCustomer(id, turn);
+        return new RegularCustomer(id);
     }
 }

@@ -26,14 +26,13 @@ public class HappyHour {
         return turnsRemaining;
     }
 
-    /** Returns false if Happy Hour was already used this game. */
-    public boolean activate() {
+    /** Has no effect if Happy Hour was already used this game. */
+    public void activate() {
         if (used) {
-            return false;
+            return;
         }
         used = true;
         turnsRemaining = DURATION_TURNS;
-        return true;
     }
 
     /** Called once at the end of every turn. */

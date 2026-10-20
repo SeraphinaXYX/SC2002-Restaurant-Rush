@@ -32,12 +32,4 @@ public class ComboMeal implements OrderItem {
     public int getPrepUnits() {
         return first.getPrepUnits() + second.getPrepUnits();
     }
-
-    public MenuItem getFirst() {
-        return first;
-    }
-
-    public MenuItem getSecond() {
-        return second;
-    }
 }

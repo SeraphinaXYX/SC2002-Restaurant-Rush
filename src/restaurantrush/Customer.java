@@ -15,16 +15,14 @@ public abstract class Customer {
     private static final double COMBO_CHANCE = 0.3;
 
     private final int id;
-    private final int arrivalTurn;
     private int satisfaction = MAX_SATISFACTION;
     private CustomerState state = CustomerState.WAITING;
     private Table table;
     private Order order;
     private int recordedSatisfaction = -1;
 
-    protected Customer(int id, int arrivalTurn) {
+    protected Customer(int id) {
         this.id = id;
-        this.arrivalTurn = arrivalTurn;
     }
 
     /** Satisfaction lost for every turn spent waiting for a table or food. */
@@ -122,10 +120,6 @@ public abstract class Customer {
 
     public int getId() {
         return id;
-    }
-
-    public int getArrivalTurn() {
-        return arrivalTurn;
     }
 
     public int getSatisfaction() {

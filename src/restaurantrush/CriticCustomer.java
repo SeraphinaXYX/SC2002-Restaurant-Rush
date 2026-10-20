@@ -15,8 +15,8 @@ public class CriticCustomer extends Customer {
     private static final int FAST_BONUS = 5;
     private static final int SLOW_PENALTY = 10;
 
-    public CriticCustomer(int id, int arrivalTurn) {
-        super(id, arrivalTurn);
+    public CriticCustomer(int id) {
+        super(id);
     }
 
     @Override

@@ -11,8 +11,8 @@ import java.util.Random;
 public class VIPCustomer extends Customer {
     private static final int DISCOUNT_PERCENT = 10;
 
-    public VIPCustomer(int id, int arrivalTurn) {
-        super(id, arrivalTurn);
+    public VIPCustomer(int id) {
+        super(id);
     }
 
     @Override

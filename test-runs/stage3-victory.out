@@ -26,6 +26,7 @@ Menu:
  TURN 1 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
 ========================================================================
   * Regular #1 arrives and joins the queue (satisfaction 100).
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    Regular #1 [satisfaction 100, WAITING]
@@ -38,7 +39,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
  Host Hana - seat which customer?
    1. Regular #1 [satisfaction 100, WAITING]
    2. Wait
@@ -73,6 +73,7 @@ Menu:
 ========================================================================
  TURN 2 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
 ========================================================================
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    (empty)
@@ -86,7 +87,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
   * Host Hana has nobody to seat.
  Waiter Wendy - choose one task:
    1. Seat a waiting customer
@@ -107,6 +107,7 @@ Menu:
 ========================================================================
  TURN 3 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
 ========================================================================
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    (empty)
@@ -120,7 +121,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
   * Host Hana has nobody to seat.
  Waiter Wendy - choose one task:
    1. Seat a waiting customer
@@ -139,6 +139,7 @@ Menu:
  TURN 4 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
 ========================================================================
   * Regular #2 arrives and joins the queue (satisfaction 100).
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    Regular #2 [satisfaction 100, WAITING]
@@ -152,7 +153,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
  Host Hana - seat which customer?
    1. Regular #2 [satisfaction 100, WAITING]
    2. Wait
@@ -188,6 +188,7 @@ Menu:
 ========================================================================
  TURN 5 / 18     Revenue: $9.00     Avg satisfaction (paid): 92.0
 ========================================================================
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    (empty)
@@ -201,7 +202,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
   * Host Hana has nobody to seat.
  Waiter Wendy - choose one task:
    1. Seat a waiting customer
@@ -222,6 +222,7 @@ Menu:
 ========================================================================
  TURN 6 / 18     Revenue: $9.00     Avg satisfaction (paid): 92.0
 ========================================================================
+ Activate Happy Hour now? (once per game) y/n > n
  Happy Hour: not used yet (can be switched on once)
  Waiting queue:
    (empty)
@@ -235,7 +236,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > n
   * Host Hana has nobody to seat.
  Waiter Wendy - choose one task:
    1. Seat a waiting customer
@@ -257,7 +257,9 @@ Menu:
  TURN 7 / 18     Revenue: $9.00     Avg satisfaction (paid): 92.0
 ========================================================================
   * VIP #3 arrives and joins the queue (satisfaction 100).
- Happy Hour: not used yet (can be switched on once)
+ Activate Happy Hour now? (once per game) y/n > y
+  * Happy Hour is ON for this turn and the next: 20% off new orders.
+ Happy Hour: ACTIVE, 2 turn(s) left including this one (20% off new orders, waiting customers +15)
  Waiting queue:
    VIP #3 [satisfaction 100, WAITING]
  Tables:
@@ -270,8 +272,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
- Activate Happy Hour now? (once per game) y/n > y
-  * Happy Hour is ON for this turn and the next: 20% off new orders.
  Host Hana - seat which customer?
    1. VIP #3 [satisfaction 100, WAITING]
    2. Wait
@@ -307,11 +307,12 @@ Menu:
 ========================================================================
  TURN 8 / 18     Revenue: $9.00     Avg satisfaction (paid): 92.0
 ========================================================================
+  * Happy Hour: VIP #3 cheers up, satisfaction 95 -> 100.
  Happy Hour: ACTIVE, 1 turn(s) left including this one (20% off new orders, waiting customers +15)
  Waiting queue:
    (empty)
  Tables:
-   Table 1: VIP #3 [satisfaction 95, ORDERED]
+   Table 1: VIP #3 [satisfaction 100, ORDERED]
             order: COOKING 1/2 units, $15.55
    Table 2: Regular #2 [satisfaction 84, READY_TO_PAY]
             order: READY_TO_PAY 2/2 units, $21.60
@@ -321,7 +322,6 @@ Menu:
    Chef Carlos      one preparation unit on one order
    Cashier Cathy    automatic, collects one payment per turn
 ------------------------------------------------------------------------
-  * Happy Hour: VIP #3 cheers up, satisfaction 95 -> 100.
   * Host Hana has nobody to seat.
  Waiter Wendy - choose one task:
    1. Seat a waiting customer

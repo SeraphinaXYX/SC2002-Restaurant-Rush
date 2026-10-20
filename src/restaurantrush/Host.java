@@ -24,10 +24,6 @@ public class Host extends Staff {
     }
 
     public ActionResult seat(Customer customer, Table table, Restaurant restaurant) {
-        ActionResult result = restaurant.seatAt(customer, table);
-        if (!result.isSuccess()) {
-            return result;
-        }
-        return ActionResult.ok(getLabel() + " seats " + customer.getName() + " at Table " + table.getId() + ".");
+        return seatCustomer(customer, table, restaurant);
     }
 }

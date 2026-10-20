@@ -45,8 +45,8 @@ public class GameController {
     private void playTurn() {
         view.showTurnHeader(turn, restaurant);
         arrivals();
-        view.showState(restaurant, staffOnDuty(), happyHour);
         happyHourStart();
+        view.showState(restaurant, staffOnDuty(), happyHour);
         managerChoices();
         eatingAndPayment();
         waitingAndAbandonment();
@@ -80,6 +80,7 @@ public class GameController {
 
     /**
      * Happy Hour can be switched on once, at the start of a turn, before any staff act.
+     * It runs before the state is printed so the manager sees post-recovery satisfaction.
      * While active, only customers still waiting for a table or food recover; paid
      * customers keep the satisfaction recorded when they paid.
      */
