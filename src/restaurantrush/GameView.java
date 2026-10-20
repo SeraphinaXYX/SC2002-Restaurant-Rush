@@ -30,6 +30,7 @@ public class GameView {
         System.out.println("Which stage do you want to play?");
         System.out.println("  1. Basic operation (Regular customers)");
         System.out.println("  2. Customer behaviour (adds a VIP and a Critic)");
+        System.out.println("  3. Host, combo meals and Happy Hour");
         while (true) {
             System.out.print("Stage (1-" + maxStage + ") > ");
             String line = readLine();
@@ -74,7 +75,7 @@ public class GameView {
                 GameConfig.TARGET_PAID, MenuItem.formatPrice(GameConfig.TARGET_REVENUE_CENTS),
                 GameConfig.TARGET_AVG_SATISFACTION);
         System.out.println("Menu:");
-        for (OrderItem item : menu.getDishes()) {
+        for (OrderItem item : menu.getItems()) {
             System.out.printf("  %-26s %8s   %d prep unit(s)%n", item.getName(),
                     MenuItem.formatPrice(item.getPriceCents()), item.getPrepUnits());
         }
@@ -90,7 +91,11 @@ public class GameView {
         System.out.println(LINE);
     }
 
-    public void showState(Restaurant restaurant, List<Staff> staff) {
+    /** happyHour is null when the stage has no Happy Hour. */
+    public void showState(Restaurant restaurant, List<Staff> staff, HappyHour happyHour) {
+        if (happyHour != null) {
+            System.out.println(" Happy Hour: " + describe(happyHour));
+        }
         System.out.println(" Waiting queue:");
         if (restaurant.getQueue().isEmpty()) {
             System.out.println("   (empty)");
@@ -115,6 +120,24 @@ public class GameView {
             System.out.printf("   %-16s %s%n", s.getLabel(), s.getDuty());
         }
         System.out.println(THIN);
+    }
+
+    public boolean askActivateHappyHour() {
+        while (true) {
+            System.out.print(" Activate Happy Hour now? (once per game) y/n > ");
+            String line = readLine();
+            if (line == null || line.equalsIgnoreCase("n") || line.equalsIgnoreCase("no")) {
+                return false;
+            }
+            if (line.equalsIgnoreCase("y") || line.equalsIgnoreCase("yes")) {
+                return true;
+            }
+            System.out.println("  ! Please answer y or n.");
+        }
+    }
+
+    public void showRecovery(Customer customer, int before, int after) {
+        showAction("Happy Hour: " + customer.getName() + " cheers up, satisfaction " + before + " -> " + after + ".");
     }
 
     public Waiter.Action chooseWaiterAction(Waiter waiter) {
@@ -245,6 +268,14 @@ public class GameView {
 
     private static String describe(Order o) {
         return String.format("%s %s units, %s", o.getStatus(), o.getProgress(), MenuItem.formatPrice(o.getPriceCents()));
+    }
+
+    private static String describe(HappyHour happyHour) {
+        if (happyHour.isActive()) {
+            return "ACTIVE, " + happyHour.getTurnsRemaining() + " turn(s) left including this one"
+                    + " (20% off new orders, waiting customers +" + HappyHour.RECOVERY + ")";
+        }
+        return happyHour.isAvailable() ? "not used yet (can be switched on once)" : "used";
     }
 
     private static String formatAverage(Double avg) {

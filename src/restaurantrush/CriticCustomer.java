@@ -29,7 +29,8 @@ public class CriticCustomer extends Customer {
         return priceCents;
     }
 
-    // Ties keep the earlier item, so the choice does not depend on the seed.
+    // A critic judges the kitchen on its priciest single dish, so never a combo.
+    // Ties keep the earlier dish, so the choice does not depend on the seed.
     @Override
     public OrderItem chooseItem(Menu menu, Random rng) {
         OrderItem best = null;

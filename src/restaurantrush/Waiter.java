@@ -34,8 +34,12 @@ public class Waiter extends Staff {
         return ActionResult.ok(getLabel() + " seats " + customer.getName() + " at Table " + table.getId() + ".");
     }
 
-    /** The customer picks the food; the price is worked out and locked here. */
-    public ActionResult takeOrder(Customer customer, Menu menu, Random rng, int turn, Restaurant restaurant) {
+    /**
+     * The customer picks the food; the price is worked out and locked here.
+     * happyHour may be null when the stage has no Happy Hour.
+     */
+    public ActionResult takeOrder(Customer customer, Menu menu, HappyHour happyHour, Random rng, int turn,
+                                  Restaurant restaurant) {
         if (customer.getState() != CustomerState.SEATED) {
             if (customer.getOrder() != null) {
                 return ActionResult.fail(customer.getName() + " has already ordered "
@@ -44,7 +48,10 @@ public class Waiter extends Staff {
             return ActionResult.fail(customer.getName() + " is not seated at a table.");
         }
         OrderItem item = customer.chooseItem(menu, rng);
-        int price = customer.applyDiscount(item.getPriceCents());
+        int price = customer.applyDiscount(item.getPriceCents()); // customer discount first (VIP 10%)
+        if (happyHour != null) {
+            price = happyHour.apply(price); // then Happy Hour 20%, only while active
+        }
         Order order = new Order(customer, item, price, turn);
         customer.placeOrder(order);
         restaurant.addOrder(order);

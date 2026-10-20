@@ -12,6 +12,7 @@ import java.util.Random;
  */
 public abstract class Customer {
     private static final int MAX_SATISFACTION = 100;
+    private static final double COMBO_CHANCE = 0.3;
 
     private final int id;
     private final int arrivalTurn;
@@ -44,8 +45,16 @@ public abstract class Customer {
     public void onServed(int waitTurns) {
     }
 
-    /** Default ordering rule: a seeded random pick from the dishes. */
+    /**
+     * Default ordering rule: if the menu has combos, a 30% seeded chance of a
+     * random combo, otherwise a seeded random dish.
+     */
     protected OrderItem pickDefault(Menu menu, Random rng) {
+        // check hasCombos first so Stage 1/2 games use the random numbers exactly as before
+        if (menu.hasCombos() && rng.nextDouble() < COMBO_CHANCE) {
+            List<ComboMeal> combos = menu.getCombos();
+            return combos.get(rng.nextInt(combos.size()));
+        }
         List<OrderItem> dishes = menu.getDishes();
         return dishes.get(rng.nextInt(dishes.size()));
     }
@@ -64,6 +73,10 @@ public abstract class Customer {
     public boolean loseSatisfaction() {
         adjustSatisfaction(-getSatisfactionLoss());
         return satisfaction == 0;
+    }
+
+    public void recoverSatisfaction(int amount) {
+        adjustSatisfaction(amount);
     }
 
     protected void adjustSatisfaction(int delta) {

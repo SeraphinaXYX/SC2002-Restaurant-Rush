@@ -1,5 +1,6 @@
 package restaurantrush;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -18,6 +19,8 @@ public class GameController {
     private final Waiter waiter = new Waiter("Wendy");
     private final Chef chef = new Chef("Carlos");
     private final Cashier cashier = new Cashier("Cathy");
+    private final Host host;            // null below Stage 3
+    private final HappyHour happyHour;  // null below Stage 3
     private int turn;
     private int nextCustomerId = 1;
 
@@ -25,8 +28,10 @@ public class GameController {
         this.config = config;
         this.view = view;
         this.restaurant = new Restaurant(GameConfig.TABLE_COUNT);
-        this.menu = new Menu();
+        this.menu = new Menu(config.hasCombos());
         this.rng = new Random(config.getSeed());
+        this.host = config.hasHost() ? new Host("Hana") : null;
+        this.happyHour = config.hasHappyHour() ? new HappyHour() : null;
     }
 
     public void run() {
@@ -40,11 +45,26 @@ public class GameController {
     private void playTurn() {
         view.showTurnHeader(turn, restaurant);
         arrivals();
-        view.showState(restaurant, List.of(waiter, chef, cashier));
+        view.showState(restaurant, staffOnDuty(), happyHour);
+        happyHourStart();
         managerChoices();
         eatingAndPayment();
         waitingAndAbandonment();
+        if (happyHour != null) {
+            happyHour.endTurn();
+        }
         view.showTurnEnd(turn, restaurant);
+    }
+
+    private List<Staff> staffOnDuty() {
+        List<Staff> staff = new ArrayList<>();
+        if (host != null) {
+            staff.add(host);
+        }
+        staff.add(waiter);
+        staff.add(chef);
+        staff.add(cashier);
+        return staff;
     }
 
     // Step 1
@@ -58,10 +78,69 @@ public class GameController {
         }
     }
 
-    // Steps 2 and 3: the Waiter always acts before the Chef
+    /**
+     * Happy Hour can be switched on once, at the start of a turn, before any staff act.
+     * While active, only customers still waiting for a table or food recover; paid
+     * customers keep the satisfaction recorded when they paid.
+     */
+    private void happyHourStart() {
+        if (happyHour == null) {
+            return;
+        }
+        if (happyHour.isAvailable() && view.askActivateHappyHour()) {
+            happyHour.activate();
+            view.showAction("Happy Hour is ON for this turn and the next: 20% off new orders.");
+        }
+        if (happyHour.isActive()) {
+            for (Customer customer : restaurant.getCustomers()) {
+                if (customer.isWaitingForService()) {
+                    int before = customer.getSatisfaction();
+                    customer.recoverSatisfaction(HappyHour.RECOVERY);
+                    if (customer.getSatisfaction() != before) {
+                        view.showRecovery(customer, before, customer.getSatisfaction());
+                    }
+                }
+            }
+        }
+    }
+
+    // Steps 2 and 3: Host (Stage 3) first, and the Waiter always acts before the Chef
     private void managerChoices() {
+        if (host != null) {
+            hostTurn();
+        }
         waiterTurn();
         chefTurn();
+    }
+
+    // The Host is asked once per turn, which is what limits it to one seat
+    private void hostTurn() {
+        while (true) {
+            if (restaurant.getQueue().isEmpty()) {
+                view.showAction(host.getLabel() + " has nobody to seat.");
+                return;
+            }
+            if (restaurant.getFreeTables().isEmpty()) {
+                view.showAction(host.getLabel() + " has no free table to use.");
+                return;
+            }
+            Customer customer = view.chooseCustomer(host.getLabel() + " - seat which customer?",
+                    restaurant.getQueue().getAll(), "Wait");
+            if (customer == null) {
+                view.showAction(host.getLabel() + " waits this turn.");
+                return;
+            }
+            Table table = view.chooseTable("At which table?", restaurant.getTables());
+            if (table == null) {
+                continue;
+            }
+            ActionResult result = host.seat(customer, table, restaurant);
+            if (result.isSuccess()) {
+                view.showAction(result.getMessage());
+                return;
+            }
+            view.showError(result.getMessage());
+        }
     }
 
     private void waiterTurn() {
@@ -109,7 +188,7 @@ public class GameController {
         if (table.isFree()) {
             return ActionResult.fail("Table " + table.getId() + " is empty.");
         }
-        return waiter.takeOrder(table.getCustomer(), menu, rng, turn, restaurant);
+        return waiter.takeOrder(table.getCustomer(), menu, happyHour, rng, turn, restaurant);
     }
 
     private ActionResult waiterServe() {

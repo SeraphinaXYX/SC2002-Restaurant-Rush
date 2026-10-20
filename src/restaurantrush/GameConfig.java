@@ -27,6 +27,18 @@ public class GameConfig {
         return stage;
     }
 
+    public boolean hasHost() {
+        return stage >= 3;
+    }
+
+    public boolean hasHappyHour() {
+        return stage >= 3;
+    }
+
+    public boolean hasCombos() {
+        return stage >= 3;
+    }
+
     public long getSeed() {
         return seed;
     }
