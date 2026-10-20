@@ -1,0 +1,656 @@
+Random seed (press Enter for 42) > 42
+========================================================================
+  RESTAURANT RUSH            (seed 42)
+========================================================================
+You are the manager: 2 tables, 18 turns, customers arrive on turns [1, 4, 7, 10, 13, 16].
+To win: at least 4 paid customers, revenue at least $45.00 and average
+satisfaction of paid customers at least 60.
+Menu:
+  Salad                         $9.00   1 prep unit(s)
+  Burger                       $15.00   1 prep unit(s)
+  Pasta                        $18.00   2 prep unit(s)
+(The customer arriving on turn 16 cannot finish paying in time - that is expected.)
+
+========================================================================
+ TURN 1 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #1 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #1 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: (free)
+   Table 2: (free)
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 1
+ Seat which customer?
+   1. Regular #1 [satisfaction 100, WAITING]
+   2. Back
+ Choice > 1
+ At which table?
+   1. Table 1 - free
+   2. Table 2 - free
+   3. Back
+ Choice > 1
+  * Waiter Wendy seats Regular #1 at Table 1.
+  * Chef Carlos has nothing to prepare.
+------------------------------------------------------------------------
+ End of turn 1: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 1/18
+
+========================================================================
+ TURN 2 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   (empty)
+ Tables:
+   Table 1: Regular #1 [satisfaction 92, SEATED]
+   Table 2: (free)
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 2
+ Take the order at which table?
+   1. Table 1 - Regular #1 [satisfaction 92, SEATED]
+   2. Table 2 - free
+   3. Back
+ Choice > 1
+  * Waiter Wendy takes Regular #1's order: Pasta ($18.00).
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Wait
+ Choice > 2
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 2: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 2/18
+
+========================================================================
+ TURN 3 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   (empty)
+ Tables:
+   Table 1: Regular #1 [satisfaction 84, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: (free)
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Wait
+ Choice > 2
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 3: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 3/18
+
+========================================================================
+ TURN 4 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #2 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #2 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 76, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: (free)
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 1
+ Seat which customer?
+   1. Regular #2 [satisfaction 100, WAITING]
+   2. Back
+ Choice > 1
+ At which table?
+   1. Table 1 - Regular #1 [satisfaction 76, ORDERED]
+   2. Table 2 - free
+   3. Back
+ Choice > 2
+  * Waiter Wendy seats Regular #2 at Table 2.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Wait
+ Choice > 2
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 4: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 4/18
+
+========================================================================
+ TURN 5 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   (empty)
+ Tables:
+   Table 1: Regular #1 [satisfaction 68, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 92, SEATED]
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 2
+ Take the order at which table?
+   1. Table 1 - Regular #1 [satisfaction 68, ORDERED]
+   2. Table 2 - Regular #2 [satisfaction 92, SEATED]
+   3. Back
+ Choice > 2
+  * Waiter Wendy takes Regular #2's order: Salad ($9.00).
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 5: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 5/18
+
+========================================================================
+ TURN 6 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   (empty)
+ Tables:
+   Table 1: Regular #1 [satisfaction 60, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 84, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 6: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 6/18
+
+========================================================================
+ TURN 7 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #3 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #3 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 52, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 76, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 7: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 7/18
+
+========================================================================
+ TURN 8 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #3 [satisfaction 92, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 44, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 68, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 8: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 8/18
+
+========================================================================
+ TURN 9 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #3 [satisfaction 84, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 36, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 60, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 9: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 9/18
+
+========================================================================
+ TURN 10 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #4 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #3 [satisfaction 76, WAITING]
+   Regular #4 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 28, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 52, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 10: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 10/18
+
+========================================================================
+ TURN 11 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #3 [satisfaction 68, WAITING]
+   Regular #4 [satisfaction 92, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 20, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 44, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 11: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 11/18
+
+========================================================================
+ TURN 12 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #3 [satisfaction 60, WAITING]
+   Regular #4 [satisfaction 84, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 12, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 36, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 12: served 0 | unhappy departures 0 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 12/18
+
+========================================================================
+ TURN 13 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #5 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #3 [satisfaction 52, WAITING]
+   Regular #4 [satisfaction 76, WAITING]
+   Regular #5 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: Regular #1 [satisfaction 4, ORDERED]
+            order: PLACED 0/2 units, $18.00
+   Table 2: Regular #2 [satisfaction 28, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Pasta for Regular #1 - PLACED 0/2 units, $18.00
+   2. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+  * Regular #1 runs out of patience and leaves without paying.
+------------------------------------------------------------------------
+ End of turn 13: served 0 | unhappy departures 1 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 13/18
+
+========================================================================
+ TURN 14 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #3 [satisfaction 44, WAITING]
+   Regular #4 [satisfaction 68, WAITING]
+   Regular #5 [satisfaction 92, WAITING]
+ Tables:
+   Table 1: (free)
+   Table 2: Regular #2 [satisfaction 20, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 1
+ Seat which customer?
+   1. Regular #3 [satisfaction 44, WAITING]
+   2. Regular #4 [satisfaction 68, WAITING]
+   3. Regular #5 [satisfaction 92, WAITING]
+   4. Back
+ Choice > 1
+ At which table?
+   1. Table 1 - free
+   2. Table 2 - Regular #2 [satisfaction 20, ORDERED]
+   3. Back
+ Choice > 1
+  * Waiter Wendy seats Regular #3 at Table 1.
+ Chef Carlos - prepare one unit of which order?
+   1. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   2. Wait
+ Choice > 2
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 14: served 0 | unhappy departures 1 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 14/18
+
+========================================================================
+ TURN 15 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #4 [satisfaction 60, WAITING]
+   Regular #5 [satisfaction 84, WAITING]
+ Tables:
+   Table 1: Regular #3 [satisfaction 36, SEATED]
+   Table 2: Regular #2 [satisfaction 12, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 2
+ Take the order at which table?
+   1. Table 1 - Regular #3 [satisfaction 36, SEATED]
+   2. Table 2 - Regular #2 [satisfaction 12, ORDERED]
+   3. Back
+ Choice > 1
+  * Waiter Wendy takes Regular #3's order: Salad ($9.00).
+ Chef Carlos - prepare one unit of which order?
+   1. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   2. Salad for Regular #3 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 15: served 0 | unhappy departures 1 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 15/18
+
+========================================================================
+ TURN 16 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+  * Regular #6 arrives and joins the queue (satisfaction 100).
+ Waiting queue:
+   Regular #4 [satisfaction 52, WAITING]
+   Regular #5 [satisfaction 76, WAITING]
+   Regular #6 [satisfaction 100, WAITING]
+ Tables:
+   Table 1: Regular #3 [satisfaction 28, ORDERED]
+            order: PLACED 0/1 units, $9.00
+   Table 2: Regular #2 [satisfaction 4, ORDERED]
+            order: PLACED 0/1 units, $9.00
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 4
+  * Waiter Wendy waits this turn.
+ Chef Carlos - prepare one unit of which order?
+   1. Salad for Regular #2 - PLACED 0/1 units, $9.00
+   2. Salad for Regular #3 - PLACED 0/1 units, $9.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+  * Regular #2 runs out of patience and leaves without paying.
+------------------------------------------------------------------------
+ End of turn 16: served 0 | unhappy departures 2 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 16/18
+
+========================================================================
+ TURN 17 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #4 [satisfaction 44, WAITING]
+   Regular #5 [satisfaction 68, WAITING]
+   Regular #6 [satisfaction 92, WAITING]
+ Tables:
+   Table 1: Regular #3 [satisfaction 20, ORDERED]
+            order: PLACED 0/1 units, $9.00
+   Table 2: (free)
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 1
+ Seat which customer?
+   1. Regular #4 [satisfaction 44, WAITING]
+   2. Regular #5 [satisfaction 68, WAITING]
+   3. Regular #6 [satisfaction 92, WAITING]
+   4. Back
+ Choice > 1
+ At which table?
+   1. Table 1 - Regular #3 [satisfaction 20, ORDERED]
+   2. Table 2 - free
+   3. Back
+ Choice > 2
+  * Waiter Wendy seats Regular #4 at Table 2.
+ Chef Carlos - prepare one unit of which order?
+   1. Salad for Regular #3 - PLACED 0/1 units, $9.00
+   2. Wait
+ Choice > 2
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 17: served 0 | unhappy departures 2 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 17/18
+
+========================================================================
+ TURN 18 / 18     Revenue: $0.00     Avg satisfaction (paid): N/A
+========================================================================
+ Waiting queue:
+   Regular #5 [satisfaction 60, WAITING]
+   Regular #6 [satisfaction 84, WAITING]
+ Tables:
+   Table 1: Regular #3 [satisfaction 12, ORDERED]
+            order: PLACED 0/1 units, $9.00
+   Table 2: Regular #4 [satisfaction 36, SEATED]
+ Staff on duty:
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+------------------------------------------------------------------------
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > 2
+ Take the order at which table?
+   1. Table 1 - Regular #3 [satisfaction 12, ORDERED]
+   2. Table 2 - Regular #4 [satisfaction 36, SEATED]
+   3. Back
+ Choice > 2
+  * Waiter Wendy takes Regular #4's order: Pasta ($18.00).
+ Chef Carlos - prepare one unit of which order?
+   1. Salad for Regular #3 - PLACED 0/1 units, $9.00
+   2. Pasta for Regular #4 - PLACED 0/2 units, $18.00
+   3. Wait
+ Choice > 3
+  * Chef Carlos waits this turn.
+------------------------------------------------------------------------
+ End of turn 18: served 0 | unhappy departures 2 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 18/18
+
+========================================================================
+  DEFEAT. At least one target was missed.
+========================================================================
+  Paid customers    0        (need 4)   [missed]
+  Revenue           $0.00    (need $45.00)  [missed]
+  Avg satisfaction  N/A      (need 60)  [missed]
+  Unhappy departures: 2
