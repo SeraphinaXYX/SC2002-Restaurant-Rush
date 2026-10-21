@@ -1,0 +1,47 @@
+\section{Reflections}
+\label{sec:reflections}
+
+\subsection{Who Did What}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Member} & \textbf{Main ownership} \\
+\midrule
+Member A & \texttt{GameController} and \texttt{GameConfig}: the six-step turn loop, arrival schedule, result check \\
+Member B & \texttt{Customer}, \texttt{CustomerState}, \texttt{Order}, \texttt{OrderStatus}, \texttt{Table}, \texttt{WaitingQueue}, \texttt{Restaurant} \\
+Member C & \texttt{Staff}, \texttt{Waiter}, \texttt{Chef}, \texttt{Cashier}, \texttt{ActionResult}; Stage 2 \texttt{VIPCustomer} and \texttt{CriticCustomer} \\
+Member D & Stage 3: \texttt{Host}, \texttt{ComboMeal}, \texttt{Menu}, \texttt{HappyHour}; pricing checks \\
+Member E & \texttt{GameView} and \texttt{RestaurantRush}, UML diagrams, test runs, report editing, video \\
+\bottomrule
+\end{tabularx}
+\caption{Ownership by member}
+\end{table}
+
+Before each stage tag, every member read through at least one other member's classes, so each of us can explain code we did not write.
+
+\subsection{Problems We Hit}
+
+\textbf{Payment timing.} Our first Stage 1 build let a customer pay on the same turn they finished eating, so the Pasta example in the brief paid on turn 5 instead of turn 6. We fixed it by ordering step 4 so that the \texttt{Cashier} collects first, and only orders that were already \texttt{READY\_TO\_PAY} can be charged. Only after that do \texttt{SERVED} orders from earlier turns move to \texttt{READY\_TO\_PAY}. A dish served on turn 4 now becomes \texttt{READY\_TO\_PAY} on turn 5 and is paid on turn 6, which is what \texttt{stage1-victory.out} shows (Section~\ref{sec:functional}).
+
+\textbf{Staff logic in the controller.} At first all seating, ordering and serving rules lived inside \texttt{GameController}. It worked, but when we drew the class diagram the controller was one huge box and we could not say who was responsible for what. We moved each task into \texttt{Waiter}, \texttt{Chef}, \texttt{Cashier} and later \texttt{Host}. Every action now returns an \texttt{ActionResult}, so an invalid choice, such as serving a Pasta that is still 1/2 prepared, prints the reason and the manager picks again without losing the staff task.
+
+\textbf{Happy Hour and paid customers.} In an early Stage~3 version, the +15 recovery was given to everyone who no longer had a table. That included customers who had already paid, so their recorded satisfaction went up and the average looked better than it really was. We only noticed because one test run ended with an average of 99. The recovery now checks the customer's state, so only customers still waiting for a table or for food recover, and the run \texttt{stage3-happy-hour-after-payment} keeps the paid average unchanged through both Happy Hour turns.
+
+\textbf{What the screen shows on Happy Hour turns.} In the peer review before the final tag, a teammate pointed out that the start-of-turn display was printed before the recovery was applied. The numbers on screen were therefore 15 lower than the ones the turn actually used. We moved the recovery before the state display, so what the manager sees matches the rules.
+
+\textbf{The Critic and combo meals.} Our first idea was that a Critic orders the most expensive item on the whole menu. Once combos existed, that item became Pasta + Pasta, which needs 4 preparation units. Counting it through, a Critic arriving on turn 13 would be served on turn 18 at the earliest and could never pay. We changed the rule so that a Critic judges the kitchen on its most expensive single dish (Pasta). This keeps the Critic's preference distinct while leaving the Stage~2 behaviour unchanged.
+
+\textbf{The turn-16 customer.} During testing we first thought the last customer never paying was a bug. Tracing it by hand showed that even with perfect play they cannot reach \texttt{READY\_TO\_PAY} in time, which the brief says is intended. We plan around at most five payers.
+
+\textbf{Money rounding.} Prices are stored as \texttt{int} cents, and rounding happens after each step, with the final price locked into the \texttt{Order}. A Salad + Pasta combo is $2700 \times 0.9 = 2430$ cents (\$24.30). A VIP Burger in Happy Hour is $1500 \times 0.9 = 1350$, then $1350 \times 0.8 = 1080$ cents (\$10.80). Both match the brief.
+
+\subsection{What We Would Do Differently}
+
+We would draw the class diagram before writing Stage 1 code, since the controller problem only became obvious on paper. We would also add JUnit tests for pricing and turn timing early on. Most of our checking was done by replaying seeded runs and comparing transcripts, which caught real bugs but was slow to set up.
+
+\subsection{What We Learned}
+
+Polymorphism paid off most when the requirements changed. Adding VIP and Critic customers needed two new subclasses, a small hook in \texttt{Customer}, a change to \texttt{Waiter.serve()} so it passes the waiting time, and the arrival switch in \texttt{GameConfig}. \texttt{GameController} had no diff at all between \texttt{stage-1} and \texttt{stage-2}. In Stage~3, \texttt{ComboMeal} implementing \texttt{OrderItem} meant \texttt{Order}, \texttt{Chef} and \texttt{Cashier} stayed untouched. Happy Hour was the opposite case: it is a rule about the whole turn, so it did need changes to \texttt{GameController} and \texttt{Waiter.takeOrder()}. Our main lesson is that small classes with one clear job were easier to extend, test and explain than one class that does everything. Replaying the Stage~1 and Stage~2 scripts on the final build and getting the same transcripts gave us confidence that the later stages did not break the earlier rules.

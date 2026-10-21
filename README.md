@@ -11,11 +11,11 @@ Repository: https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush
 
 | Name | Matric No. | Main parts |
 |------|-----------|------------|
-| Member A | U2XXXXXXX | GameController, turn sequence |
-| Member B | U2XXXXXXX | Customer hierarchy (Regular, VIP, Critic) |
-| Member C | U2XXXXXXX | Staff classes, ActionResult |
-| Member D | U2XXXXXXX | Menu, ComboMeal, HappyHour |
-| Member E | U2XXXXXXX | GameView, testing, report diagrams |
+| Member A | U2XXXXXXX | Turn loop and game rules (GameController, GameConfig) |
+| Member B | U2XXXXXXX | Domain model (Customer, Order, Table, Restaurant) |
+| Member C | U2XXXXXXX | Staff classes, ActionResult; Stage 2 customers |
+| Member D | U2XXXXXXX | Stage 3 (Host, ComboMeal, Menu, HappyHour) |
+| Member E | U2XXXXXXX | CLI (GameView), UML diagrams, report, video |
 
 ## Build and run
 
@@ -160,18 +160,20 @@ java -cp bin restaurantrush.RestaurantRush --echo < test-runs/stage3-victory.txt
 
 The PDF report (class diagram, sequence diagram, design discussion, functional evidence and
 reflections) is in [report/SC2002_Restaurant_Rush_Report.pdf](report/SC2002_Restaurant_Rush_Report.pdf).
+The two UML diagrams are also saved on their own in [report/diagrams/](report/diagrams/) so they are easier
+to zoom into, and the LaTeX source is in [report/latex/](report/latex/).
 
 ## Video timestamps
 
 | # | Segment | Presenter | Time |
 |---|---------|-----------|------|
-| 1 | Game launching from the submitted project | | TBD |
-| 2 | Manager choices when staff are constrained | | TBD |
-| 3 | A dish going READY -> SERVED -> payment | | TBD |
-| 4 | VIP or Critic behaviour | | TBD |
-| 5 | A Stage 3 feature | | TBD |
-| 6 | One victory and one defeat | | TBD |
-| 7 | Stage tag comparisons and diagrams | | TBD |
+| 1 | Game launching from the submitted project | Member E | TBD |
+| 2 | Manager choices when staff are constrained | Member A | TBD |
+| 3 | A dish going READY -> SERVED -> payment | Member B | TBD |
+| 4 | VIP or Critic behaviour | Member C | TBD |
+| 5 | A Stage 3 feature | Member D | TBD |
+| 6 | One victory and one defeat | Member A | TBD |
+| 7 | Stage tag comparisons and diagrams | Member E | TBD |
 
 ## Project structure
 
@@ -179,5 +181,5 @@ reflections) is in [report/SC2002_Restaurant_Rush_Report.pdf](report/SC2002_Rest
 src/restaurantrush/   Java source (one package, 25 files)
 test-runs/            input files and transcripts for reproducible games
 TESTING.md            what each run demonstrates
-report/               PDF report
+report/               PDF report, standalone UML diagrams, LaTeX source
 ```

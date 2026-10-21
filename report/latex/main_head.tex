@@ -1,0 +1,183 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.4cm,right=2.4cm,headheight=14pt]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,decorations.markings,shapes.multipart}
+\usepackage{pgf-umlsd}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{array}
+\usepackage{pdflscape}
+\usepackage{graphicx}
+\usepackage{parskip}
+
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\renewcommand{\arraystretch}{1.2}
+
+% Float placement: avoid pages that hold only one small float and stray blank pages
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+
+% Colors
+\definecolor{classbg}{HTML}{E8F0FE}
+\definecolor{abstractbg}{HTML}{FFF3E0}
+\definecolor{interfacebg}{HTML}{E8F5E9}
+\definecolor{enumbg}{HTML}{F3E5F5}
+\definecolor{controlbg}{HTML}{FCE4EC}
+\definecolor{boundarybg}{HTML}{E0F7FA}
+\definecolor{codebg}{HTML}{F5F5F5}
+\definecolor{darkblue}{HTML}{17324D}
+\definecolor{linkblue}{HTML}{1565C0}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    citecolor=darkblue,
+    urlcolor=linkblue,
+    pdftitle={SC2002 Restaurant Rush - Group Assignment Report},
+    pdfauthor={FCS1 Group X}
+}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+% Header/footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small SC2002 Restaurant Rush}
+\fancyhead[R]{\small\nouppercase{\leftmark}}
+\fancyfoot[L]{\small FCS1 Group X}
+\fancyfoot[R]{\small Page \thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\small Page \thepage}\renewcommand{\headrulewidth}{0pt}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% UML class box style
+\tikzset{
+    umlclass/.style={
+        rectangle split,
+        rectangle split parts=3,
+        rectangle split part fill={#1,white,white},
+        draw=black!60,
+        thick,
+        font=\ttfamily\scriptsize,
+        text width=4.8cm,
+        minimum width=5cm,
+        align=left,
+        inner sep=4pt,
+        rectangle split part align={center,left,left}
+    },
+    umlclass/.default=classbg,
+    umlsmall/.style={
+        rectangle split,
+        rectangle split parts=3,
+        rectangle split part fill={#1,white,white},
+        draw=black!60,
+        thick,
+        font=\ttfamily\scriptsize,
+        text width=3.5cm,
+        minimum width=3.7cm,
+        align=left,
+        inner sep=3pt,
+        rectangle split part align={center,left,left}
+    },
+    umlsmall/.default=classbg,
+    umlenum/.style={
+        rectangle split,
+        rectangle split parts=2,
+        rectangle split part fill={enumbg,white},
+        draw=black!60,
+        thick,
+        font=\ttfamily\scriptsize,
+        text width=3.5cm,
+        minimum width=3.7cm,
+        align=left,
+        inner sep=3pt,
+        rectangle split part align={center,left}
+    },
+    inherit/.style={-{Triangle[open,length=8pt,width=8pt]},thick},
+    realize/.style={-{Triangle[open,length=8pt,width=8pt]},thick,dashed},
+    compose/.style={-{Diamond[length=8pt,width=8pt,fill=black]},thick},
+    assoc/.style={-{Stealth[length=6pt]},thick},
+    anno/.style={font=\sffamily\scriptsize\itshape,text=blue!70!black}
+}
+
+\begin{document}
+
+% ============================================================
+% TITLE PAGE
+% ============================================================
+\begin{titlepage}
+\centering
+\vspace*{0.6cm}
+{\large\scshape Nanyang Technological University\par}
+{\normalsize College of Computing and Data Science\par}
+\vspace{1.2cm}
+{\large SC2002 Object-Oriented Design \& Programming\par}
+\vspace{0.4cm}
+{\color{darkblue}\rule{0.75\textwidth}{1pt}\par}
+\vspace{0.5cm}
+{\Huge\bfseries Restaurant Rush\par}
+\vspace{0.3cm}
+{\Large Group Assignment Report\par}
+\vspace{0.5cm}
+{\color{darkblue}\rule{0.75\textwidth}{1pt}\par}
+\vspace{1.0cm}
+\begin{tabular}{@{}rl@{}}
+\textbf{Lab group:} & FCS1 \\
+\textbf{Group:} & Group X \\
+\textbf{Language:} & Java (JDK 17 or later), command-line interface \\
+\textbf{Repository:} & \url{https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush} \\
+\textbf{Stage tags:} & \texttt{stage-1}, \texttt{stage-2}, \texttt{stage-3}
+\end{tabular}
+
+\vspace{0.9cm}
+{\large\bfseries Group Members\par}
+\vspace{0.3cm}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{8.0cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Matric No.} & \textbf{Main contribution} \\
+\midrule
+Member A & U2XXXXXXX & Turn loop and game rules (\texttt{GameController}, \texttt{GameConfig}) \\
+Member B & U2XXXXXXX & Domain model (\texttt{Customer}, \texttt{Order}, \texttt{Table}, \texttt{Restaurant}) \\
+Member C & U2XXXXXXX & Staff classes, \texttt{ActionResult}; Stage 2 customers \\
+Member D & U2XXXXXXX & Stage 3 (\texttt{Host}, \texttt{ComboMeal}, \texttt{Menu}, \texttt{HappyHour}) \\
+Member E & U2XXXXXXX & CLI (\texttt{GameView}), UML diagrams, report, video \\
+\bottomrule
+\end{tabular}
+
+\vfill
+{\large October 2026\par}
+\end{titlepage}
+
+% ============================================================
+% TABLE OF CONTENTS
+% ============================================================
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+% ============================================================
+% 1. UML CLASS DIAGRAM
+% ============================================================

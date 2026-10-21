@@ -1,0 +1,38 @@
+\section{Introduction}
+\label{sec:intro}
+
+Restaurant Rush is a turn-based restaurant management game played from the command line. The player is the manager. Each turn they decide what the Waiter and the Chef spend their single action on, while customers keep arriving and lose patience. Because staff time is the bottleneck, the interesting decisions are about priority: who gets seated first, which order the kitchen works on, and when to serve a finished dish instead of seating someone new.
+
+\subsection*{Base setting}
+
+Every build of the game offers the base setting from the brief, so that runs can be reproduced with a fixed seed.
+
+\begin{table}[H]
+\centering
+\caption{Base setting used in all three stages}
+\label{tab:base-setting}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+Turns & 18 (the game always plays all 18) \\
+Tables & 2 \\
+Staff & 1 Waiter (one task per turn), 1 Chef (one preparation unit per turn), 1 Cashier (one payment per turn) \\
+Arrivals & One customer at the start of turns 1, 4, 7, 10, 13 and 16 \\
+Menu & Salad \$9.00 (1 unit), Burger \$15.00 (1 unit), Pasta \$18.00 (2 units) \\
+Victory & At least 4 paid customers, revenue of at least \$45.00, and average satisfaction of paid customers of at least 60 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{The three stages}
+
+We built the game in three runnable stages, each tagged in the repository.
+\textbf{Stage 1} (\texttt{stage-1}) is the complete core game with Regular customers, the three menu items, the Waiter, Chef and Cashier, and both endings.
+\textbf{Stage 2} (\texttt{stage-2}) adds VIP and Critic customers. Their behaviour lives in \texttt{VIPCustomer} and \texttt{CriticCustomer}, and \texttt{GameController} did not change at all between the two tags.
+\textbf{Stage 3} (\texttt{stage-3}) adds a Host who can seat one extra customer per turn, \texttt{ComboMeal} orders made of two menu items, and a one-off Happy Hour pricing policy.
+With seed 42, our recorded victory runs end with 5 paid customers and \$63.00 (Stage~1), 4 paid and \$53.10 (Stage~2), and 5 paid and \$88.45 (Stage~3). The matching defeat runs end with nobody paid.
+
+\subsection*{How this report is organised}
+
+Section~\ref{sec:class} presents the final class diagram, drawn from the Stage~3 code (UML class diagram, 25 marks). Section~\ref{sec:sequence} follows one full scenario as a sequence diagram: Happy Hour is switched on, a VIP arrives, orders, is served, eats and pays, and the result is checked (UML sequence diagram, 20 marks). Section~4 discusses responsibilities, the design principles that the code really reflects, trade-offs and an alternative we rejected (design consideration, 15 marks). Section~5 analyses the changes between the stage tags using the real diffs, and Section~\ref{sec:functional} shows transcripts from reproducible runs. Together they support the implementation and development-process criteria (20 marks each). Section~\ref{sec:reflections} contains our reflections and Section~\ref{sec:video} lists the video segments.

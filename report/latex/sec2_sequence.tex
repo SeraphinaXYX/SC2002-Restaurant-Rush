@@ -1,0 +1,333 @@
+\newsavebox{\seqfitbox}
+\newlength{\seqfitw}\newlength{\seqfith}
+% scale a diagram to the largest size that fits both the text width and 0.82\textheight
+\newcommand{\seqfit}[1]{%
+  \sbox{\seqfitbox}{#1}%
+  \setlength{\seqfitw}{\wd\seqfitbox}%
+  \setlength{\seqfith}{\dimexpr\ht\seqfitbox+\dp\seqfitbox\relax}%
+  \ifdim\dimexpr\textwidth*\seqfith/\seqfitw\relax>0.82\textheight
+    \resizebox{!}{0.82\textheight}{\usebox{\seqfitbox}}%
+  \else
+    \resizebox{\textwidth}{!}{\usebox{\seqfitbox}}%
+  \fi}
+\section{UML Sequence Diagram}
+\label{sec:sequence}
+
+\subsection{Chosen Scenario}
+
+The scenario is a real Stage~3 game in the base setting with seed~1. It is the committed run \texttt{test-runs/stage3-vip-happy-hour-seed1.txt}, so a TA can replay it exactly. At the start of turn~7 the manager switches on Happy Hour. In the same turn Customer~3, a VIP, arrives. The Host seats the VIP at Table~1, and the Waiter then takes the VIP's order while Happy Hour is active. The VIP picks a Burger, and the price is locked at
+\[
+\$15.00 \times 0.9 \;(\mathrm{VIP}) \times 0.8 \;(\mathrm{Happy\ Hour}) = \$10.80 .
+\]
+The Chef finishes the Burger on turn~7. The Waiter serves it on turn~8, the VIP finishes eating on turn~9, and the Cashier collects \$10.80 on turn~10. After turn~18 the controller runs the result check, which gives Victory with 5 paid customers, \$73.80 revenue and an average satisfaction of 91.4.
+
+The scenario covers each item that Section~5 of the brief lists for the sequence diagram:
+\begin{itemize}[nosep]
+  \item customer arrival (created by \texttt{GameConfig}) and the order (an \texttt{Order} created by the Waiter);
+  \item the Waiter and Chef assignments chosen by the manager;
+  \item the order going \texttt{READY} and then \texttt{SERVED};
+  \item eating, payment and the end-of-game result check;
+  \item later-stage behaviour: VIP pricing (Stage~2), and the Host and Happy Hour (Stage~3).
+\end{itemize}
+Part~2 also shows what happens when the manager picks a choice that is not allowed: the Waiter returns a failed \texttt{ActionResult} with a reason and the manager is asked again. This can happen on any staff prompt; we draw it once, for serving.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{@{}c l X c@{}}
+\toprule
+\textbf{Turn} & \textbf{Phase} & \textbf{What happens (from the real run)} & \textbf{VIP sat.} \\
+\midrule
+\multirow{5}{*}{7}
+ & 1 Arrivals & \texttt{GameConfig.createArrival(7, 3)} creates a \texttt{VIPCustomer}; \texttt{Restaurant.admit()} puts it in the queue. & 100 \\
+ & Start & Manager switches Happy Hour on (active turns 7 and 8). The VIP is already at 100, so recovery changes nothing. & 100 \\
+ & 2--3 Staff & Host seats the VIP at Table~1. Waiter takes the order: Burger, list \$15.00, charged \$10.80. Chef prepares 1/1, so the order is \texttt{READY}. & 100 \\
+ & 4 Payment & Cashier collects \$15.00 from Regular~\#2 (not part of this scenario). & 100 \\
+ & 5 Waiting & Ordered but not served: $-5$. & 95 \\
+\midrule
+\multirow{2}{*}{8}
+ & Start & Happy Hour recovery: $95 \to 100$. & 100 \\
+ & 2--3 Staff & Waiter serves the Burger, which was already \texttt{READY} before the Waiter acted. It becomes \texttt{SERVED}; no more satisfaction loss. Happy Hour ends after this turn. & 100 \\
+\midrule
+9 & 4 Eating & Cashier is called first and finds nobody to charge. The order, served on an earlier turn, then moves to \texttt{READY\_TO\_PAY}. & 100 \\
+\midrule
+10 & 4 Payment & \texttt{Cashier.collectNext()}: \texttt{PAID}, revenue $+\$10.80$, satisfaction 100 recorded, Table~1 released. & 100 \\
+\midrule
+18 & 6 Result & 5 paid, \$73.80, average 91.4 against 4\,/\,\$45\,/\,60: Victory. & -- \\
+\bottomrule
+\end{tabularx}
+\caption{Timeline of the sequence-diagram scenario (Stage~3, seed~1)}
+\label{tab:seq-timeline}
+\end{table}
+
+\subsection{Sequence Diagram}
+
+We split the diagram into two parts so that it stays readable at A4 size. Part~1 (Figure~\ref{fig:seq1}) covers turn~7: arrival, Happy Hour, seating, ordering and cooking. Part~2 (Figure~\ref{fig:seq2}) covers turns 8--10 (recovery, serving, eating and payment) and the result check. Messages that only concern other customers, such as the payment from Regular~\#2 on turn~7, are left out. The notation we use is as follows:
+\begin{itemize}[nosep]
+  \item Solid arrows are synchronous calls and dashed arrows are returns.
+  \item A message labelled \guillemotleft create\guillemotright{} creates the object at the end of the arrow.
+  \item Activation bars show which object currently has control.
+  \item The \textsf{loop} fragment is the 18-turn game loop; the \textsf{turn} blocks only group the messages of one turn.
+  \item \textsf{opt} and \textsf{alt} fragments carry their guards in square brackets.
+\end{itemize}
+\begin{sloppypar}
+Only \texttt{:GameView} talks to the manager. Every rule is checked inside \texttt{:GameController}, the staff objects or the domain objects. All message names are the real method names in the \texttt{stage-3} code.
+\end{sloppypar}
+
+\begin{figure}[p]
+\centering
+\seqfit{%
+\begin{sequencediagram}
+\newthread[white]{mgr}{:Manager}
+\newinst[0.9]{view}{:GameView}
+\newinst[0.9]{ctrl}{:GameController}
+\newinst[0.9]{config}{:GameConfig}
+\newinst[0.9]{hh}{:HappyHour}
+\newinst[0.9]{rest}{:Restaurant}
+\newinst[0.9]{host}{:Host}
+\newinst[0.9]{waiter}{:Waiter}
+\newinst[0.9]{vip}{vip:VIPCustomer}
+\newinst[0.9]{order}{order:Order}
+\newinst[0.9]{chef}{:Chef}
+
+\begin{sdblock}{loop}{[turn = 1..18] \quad (shown: turn 7)}
+
+  % ---- step 1: arrival ----
+  \begin{call}{ctrl}{createArrival(7, 3)}{config}{vip}
+    \begin{call}{config}{\guillemotleft create\guillemotright\ VIPCustomer(3)}{vip}{}
+    \end{call}
+  \end{call}
+  \begin{call}{ctrl}{admit(vip)}{rest}{}
+  \end{call}
+
+  % ---- happyHourStart(): activation and recovery ----
+  \begin{sdblock}{opt}{[happyHour.isAvailable()]}
+    \begin{call}{ctrl}{askActivateHappyHour()}{view}{true}
+      \begin{call}{view}{prompt (y/n)}{mgr}{"y"}
+      \end{call}
+    \end{call}
+    \begin{call}{ctrl}{activate()}{hh}{}
+    \end{call}
+  \end{sdblock}
+  \begin{sdblock}{opt}{[happyHour.isActive() and vip.isWaitingForService()]}
+    \begin{call}{ctrl}{recoverSatisfaction(15)}{vip}{}
+    \end{call}
+  \end{sdblock}
+  \begin{call}{ctrl}{showState(restaurant, staffOnDuty(), happyHour)}{view}{}
+  \end{call}
+
+  % ---- host seats the VIP ----
+  \begin{call}{ctrl}{chooseCustomer(prompt, queue, "Wait")}{view}{vip}
+    \begin{call}{view}{list queue}{mgr}{choice}
+    \end{call}
+  \end{call}
+  \begin{call}{ctrl}{chooseTable(prompt, tables)}{view}{table1}
+  \end{call}
+  \begin{call}{ctrl}{seat(vip, table1, restaurant)}{host}{ActionResult.ok}
+    \begin{call}{host}{seatAt(vip, table1)}{rest}{ActionResult.ok}
+      \begin{call}{rest}{seatAt(table1)}{vip}{}
+      \end{call}
+    \end{call}
+  \end{call}
+
+  % ---- waiter takes the order ----
+  \begin{call}{ctrl}{chooseWaiterAction(waiter)}{view}{TAKE\_ORDER}
+    \begin{call}{view}{list tasks}{mgr}{choice}
+    \end{call}
+  \end{call}
+  \begin{call}{ctrl}{takeOrder(vip, menu, happyHour, rng, 7, restaurant)}{waiter}{ActionResult.ok}
+    \begin{call}{waiter}{chooseItem(menu, rng)}{vip}{BURGER}
+    \end{call}
+    \begin{call}{waiter}{applyDiscount(1500)}{vip}{1350}
+    \end{call}
+    \begin{call}{waiter}{apply(1350)}{hh}{1080}
+    \end{call}
+    \begin{call}{waiter}{\guillemotleft create\guillemotright\ Order(vip, BURGER, 1080, 7)}{order}{}
+    \end{call}
+    \begin{call}{waiter}{placeOrder(order)}{vip}{}
+    \end{call}
+    \begin{call}{waiter}{addOrder(order)}{rest}{}
+    \end{call}
+  \end{call}
+
+  % ---- chef ----
+  \begin{call}{ctrl}{chooseChefAction(chef, kitchenOrders)}{view}{order}
+    \begin{call}{view}{list orders}{mgr}{choice}
+    \end{call}
+  \end{call}
+  \begin{call}{ctrl}{prepare(order)}{chef}{ActionResult.ok}
+    \begin{call}{chef}{advancePrep()}{order}{}
+    \end{call}
+  \end{call}
+
+  % ---- step 5 and end of turn ----
+  \begin{sdblock}{opt}{[vip.isWaitingForService()]}
+    \begin{call}{ctrl}{loseSatisfaction()}{vip}{false (95)}
+    \end{call}
+  \end{sdblock}
+  \begin{call}{ctrl}{endTurn()}{hh}{}
+  \end{call}
+
+\end{sdblock}
+\end{sequencediagram}}
+\caption{Sequence diagram, part 1 (turn 7): VIP arrival, Happy Hour activation, the Host seating the VIP, the Waiter taking the order at a locked price, and cooking.}
+\label{fig:seq1}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\seqfit{%
+\begin{sequencediagram}
+\newthread[white]{mgr}{:Manager}
+\newinst[1.0]{view}{:GameView}
+\newinst[1.2]{ctrl}{:GameController}
+\newinst[1.0]{hh}{:HappyHour}
+\newinst[2.2]{waiter}{:Waiter}
+\newinst[1.2]{order}{order:Order}
+\newinst[1.2]{vip}{vip:VIPCustomer}
+\newinst[1.2]{cashier}{:Cashier}
+\newinst[1.2]{rest}{:Restaurant}
+
+\begin{sdblock}{loop}{[turn = 1..18] \quad (shown: turns 8--10, then end of game)}
+
+  \begin{sdblock}{turn 8}{}
+  \begin{sdblock}{opt}{[happyHour.isActive() and vip.isWaitingForService()]}
+    \begin{call}{ctrl}{recoverSatisfaction(15)}{vip}{}
+    \end{call}
+  \end{sdblock}
+  % ---- serve, re-prompt until the action is accepted ----
+  \begin{sdblock}{loop}{[until result.isSuccess()] \quad a rejected choice does not use up the Waiter's task}
+    \begin{call}{ctrl}{chooseWaiterAction(waiter)}{view}{SERVE}
+      \begin{call}{view}{list tasks}{mgr}{choice}
+      \end{call}
+    \end{call}
+    \begin{call}{ctrl}{chooseOrder(prompt, kitchenOrders, "Back")}{view}{order}
+    \end{call}
+    \begin{sdblock}{alt}{[order.isReady()]}
+      \begin{call}{ctrl}{serve(order, 8)}{waiter}{result = ActionResult.ok}
+        \begin{call}{waiter}{isReady()}{order}{true}
+        \end{call}
+        \begin{call}{waiter}{markServed(8)}{order}{}
+        \end{call}
+        \begin{call}{waiter}{receiveDish(1)}{vip}{}
+          \begin{call}{vip}{onServed(1)}{vip}{}
+          \end{call}
+        \end{call}
+      \end{call}
+    \end{sdblock}
+    \begin{sdblock}{[else]}{}
+      \begin{call}{ctrl}{serve(order, 8)}{waiter}{result = ActionResult.fail(reason)}
+        \begin{call}{waiter}{isReady()}{order}{false}
+        \end{call}
+      \end{call}
+      \begin{call}{ctrl}{showError(result.getMessage())}{view}{}
+        \begin{call}{view}{print reason}{mgr}{}
+        \end{call}
+      \end{call}
+    \end{sdblock}
+  \end{sdblock}
+  \begin{call}{ctrl}{endTurn()}{hh}{}
+  \end{call}
+  \end{sdblock}
+
+  % ---- turn 9: cashier first, then eating finishes ----
+  \begin{sdblock}{turn 9}{}
+  \begin{call}{ctrl}{collectNext(restaurant, 9)}{cashier}{null}
+    \begin{call}{cashier}{oldestReadyToPay(9)}{rest}{null}
+    \end{call}
+  \end{call}
+  \begin{sdblock}{opt}{[order SERVED and turnServed $<$ turn]}
+    \begin{call}{ctrl}{markReadyToPay(9)}{order}{}
+    \end{call}
+    \begin{call}{ctrl}{finishEating()}{vip}{}
+    \end{call}
+  \end{sdblock}
+  \end{sdblock}
+
+  % ---- turn 10: payment ----
+  \begin{sdblock}{turn 10}{}
+  \begin{call}{ctrl}{collectNext(restaurant, 10)}{cashier}{order}
+    \begin{call}{cashier}{oldestReadyToPay(10)}{rest}{order}
+    \end{call}
+    \begin{call}{cashier}{markPaid()}{order}{}
+    \end{call}
+    \begin{call}{cashier}{addRevenue(1080)}{rest}{}
+    \end{call}
+    \begin{call}{cashier}{recordSatisfaction()}{vip}{}
+    \end{call}
+    \begin{call}{cashier}{releaseTable(vip)}{rest}{}
+    \end{call}
+    \begin{call}{cashier}{markPaid()}{vip}{}
+    \end{call}
+  \end{call}
+  \begin{call}{ctrl}{showPayment(cashier, order)}{view}{}
+  \end{call}
+  \end{sdblock}
+\end{sdblock}
+
+% ---- after turn 18: result() ----
+\begin{call}{ctrl}{getPaidCount(), getRevenueCents(), getAverageSatisfaction()}{rest}{5, 7380, 91.4}
+\end{call}
+\begin{call}{ctrl}{showFinalResult(restaurant, paidOk, revenueOk, satisfactionOk)}{view}{}
+  \begin{sdblock}{alt}{[paidOk and revenueOk and satisfactionOk]}
+    \begin{call}{view}{"VICTORY!"}{mgr}{}
+    \end{call}
+  \end{sdblock}
+  \begin{sdblock}{[else]}{}
+    \begin{call}{view}{"DEFEAT"}{mgr}{}
+    \end{call}
+  \end{sdblock}
+\end{call}
+\end{sequencediagram}}
+\caption{Sequence diagram, part 2 (turns 8--10 and the result check): Happy Hour recovery, serving with validation, eating, payment, and the end-of-game check. Each \textsf{alt}/\textsf{[else]} pair is one alternative fragment. The values returned by the result check are the real ones from this run.}
+\label{fig:seq2}
+\end{figure}
+
+\subsection{Notes on the Diagram}
+
+\begin{sloppypar}
+\paragraph{Price locking.} \texttt{Waiter.takeOrder()} works out the final price only once. It first calls \texttt{applyDiscount()} on the \texttt{VIPCustomer}, then \texttt{HappyHour.apply()}, which only discounts while Happy Hour is active. The result goes into the constructor of the new \texttt{Order}, and since \texttt{priceCents} is final it cannot change afterwards. When the Cashier collects on turn~10, Happy Hour has already ended, but the bill is still \$10.80. This is how we follow the rule ``the price is locked when the order is taken''.
+\end{sloppypar}
+
+\begin{sloppypar}
+\paragraph{Object creation.} Two objects are created during the scenario. \texttt{GameConfig.createArrival(7, 3)} decides which customer type arrives on turn~7 and creates the \texttt{VIPCustomer}; the controller only passes the returned object to \texttt{Restaurant.admit()}. The Waiter creates the \texttt{Order} inside \texttt{takeOrder()}, because that is the moment the price is fixed.
+\end{sloppypar}
+
+\begin{sloppypar}
+\paragraph{Host and Waiter in the same turn.} \texttt{Host.seat()} and \texttt{Waiter.seat()} both delegate to \texttt{Staff.seatCustomer()}, which calls \texttt{Restaurant.seatAt()}; the diagram shows the call that \texttt{seatCustomer} makes. Because the Host seats the VIP, the Waiter's one task for turn~7 is still free, so the order can be taken in the same turn.
+\end{sloppypar}
+
+\paragraph{Polymorphic dispatch.} The Waiter only knows it is talking to a \texttt{Customer}. \texttt{chooseItem}, \texttt{applyDiscount} and \texttt{onServed} are resolved at run time to the \texttt{VIPCustomer} versions; the VIP does not override \texttt{onServed}, so the inherited no-op runs. If a \texttt{CriticCustomer} were in the same place, the same messages would pick the most expensive dish and apply the speed bonus or penalty. Neither the controller nor the Waiter checks the customer's type.
+
+\paragraph{Timing rules.} The Waiter acts before the Chef in every turn, so the Burger finished on turn~7 can only be served on turn~8. Inside step~4 the Cashier is called before eating is updated. On turn~9 this means the Cashier finds nobody to charge and only afterwards does the order become \texttt{READY\_TO\_PAY}, so payment happens on turn~10. \texttt{SERVED} (8), \texttt{READY\_TO\_PAY} (9) and \texttt{PAID} (10) each fall on a different turn, as in the worked example in Section~3.3 of the brief.
+
+\paragraph{Invalid choices.} \texttt{serve()} returns an \texttt{ActionResult}. In the \textsf{[else]} branch the order is not \texttt{READY}, so the Waiter returns \texttt{ActionResult.fail} with a reason such as ``Burger for VIP \#3 is not READY yet (0/1 units done)'', the controller passes the message to \texttt{GameView.showError()}, and the inner \textsf{loop} asks the manager again. The Waiter's task for the turn is not used up.
+
+\subsection{How the Manager's Choice Changes the Outcome}
+
+To see what the Happy Hour decision does, we replayed the same game (seed~1) with the same staff choices, except that the manager answers ``n'' to Happy Hour. Table~\ref{tab:seq-compare} shows the result.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+ & \textbf{Happy Hour on turn 7} & \textbf{No Happy Hour} \\
+\midrule
+VIP's locked price & \$10.80 & \$13.50 \\
+VIP's satisfaction recorded at payment (turn 10) & 100 & 95 \\
+Final paid customers & 5 & 5 \\
+Final revenue & \$73.80 & \$76.50 \\
+Final average satisfaction (paid) & 91.4 & 90.4 \\
+Result & Victory & Victory \\
+\bottomrule
+\end{tabular}
+\caption{The same seed-1 game with and without Happy Hour}
+\label{tab:seq-compare}
+\end{table}
+
+Happy Hour costs \$2.70 of revenue on the VIP's order. In return the $+15$ at the start of turn~8 cancels the 5 points the VIP lost on turn~7, so the VIP pays at 100 instead of 95 and the average rises from 90.4 to 91.4. In this run both games are comfortable wins, so the decision trades revenue for satisfaction rather than turning a defeat into a victory.
+
+The trade matters more when the restaurant is under pressure. Under the rules, a Regular customer who starts turn~7 at 16 and is not served drops to 8 and then to 0 by the end of turn~8, and walks out. With Happy Hour on turns 7 and 8 they go $16 \to 31 \to 23$ and $23 \to 38 \to 30$, and would only reach 0 at the end of turn~12. That gives the manager four more turns to serve them. Only five customers can pay at all, so keeping one of them can decide whether the 4-paid target is met.
+
+The Host's seating choice matters too. Because the Host seated the VIP on arrival, the Waiter could take the order on turn~7, inside the Happy Hour window, and the VIP paid on turn~10, well before the turn~18 cut-off.

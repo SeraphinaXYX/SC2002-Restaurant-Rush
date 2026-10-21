@@ -1,0 +1,597 @@
+\section{UML Class Diagram}
+\label{sec:class}
+
+Figure~\ref{fig:class-full} is the class diagram of our final design. It was checked line by line
+against the \texttt{stage-3} source, so every class, field and operation in it exists in the code
+under the same name and with the same parameters. To keep it readable we left out plain getters
+(such as \texttt{getId()} or \texttt{getStatus()}) and constructors that only copy their
+arguments into fields. A constructor is shown when it carries a design decision, for example
+\texttt{Menu(includeCombos)} or \texttt{Restaurant(tableCount)}.
+
+\paragraph{Notation.} We use standard UML~2 notation:
+\texttt{+}~public, \texttt{-}~private, \texttt{\#}~protected;
+\emph{italic} operations are abstract and \underline{underlined} members are static.
+Operations with no return type return \texttt{void}.
+A solid line with a hollow triangle is generalisation and a dashed one is interface realisation.
+A filled diamond is composition, a hollow diamond is aggregation, a solid line (with an open
+arrowhead when it is navigable in one direction only) is an association, and a dashed line with
+an open arrowhead is a dependency. The shaded panels group the classes into the boundary, control,
+staff and entity layers. A few associations and dependencies are not drawn because they would
+only add crossing lines, for example \texttt{GameController}~$\rightarrow$~\texttt{Menu}; they are
+all listed in Table~\ref{tab:relationships}.
+
+\usetikzlibrary{backgrounds}
+\tikzset{
+  cd/.style={rectangle split, rectangle split parts=3, draw=black!75, line width=0.5pt,
+             font=\sffamily\scriptsize, align=left, inner sep=2.2pt,
+             rectangle split part align={center,left,left}},
+  cdent/.style={cd, rectangle split part fill={classbg,white,white}},
+  cdabs/.style={cd, rectangle split part fill={abstractbg,white,white}},
+  cdint/.style={cd, rectangle split part fill={interfacebg,white,white}},
+  cdenum/.style={cd, rectangle split part fill={enumbg,white,white}},
+  cdctl/.style={cd, rectangle split part fill={controlbg,white,white}},
+  cdbnd/.style={cd, rectangle split part fill={boundarybg,white,white}},
+  inh/.style={-{Triangle[open,length=2.6mm,width=2.8mm]}, line width=0.5pt},
+  real/.style={-{Triangle[open,length=2.6mm,width=2.8mm]}, dashed, line width=0.5pt},
+  comp/.style={{Diamond[length=3.2mm,width=2.2mm]}-{Stealth[length=1.8mm]}, line width=0.5pt},
+  aggr/.style={{Diamond[open,length=3.2mm,width=2.2mm]}-{Stealth[length=1.8mm]}, line width=0.5pt},
+  assoc/.style={-{Stealth[length=1.8mm]}, line width=0.5pt},
+  link/.style={-, line width=0.5pt},
+  dep/.style={-{Stealth[open,length=2mm]}, dashed, line width=0.5pt},
+  mult/.style={font=\sffamily\tiny, inner sep=1.2pt},
+  rel/.style={font=\sffamily\tiny\itshape, inner sep=1pt},
+  cdnote/.style={draw=black!50, fill=yellow!14, font=\sffamily\tiny, align=left,
+                 text width=#1, inner sep=3pt},
+  cdnote/.default=4.4cm,
+  layer/.style={rounded corners=4pt, draw=black!20, fill=#1, inner sep=5pt},
+  elayer/.style={rounded corners=4pt, draw=none, fill=#1, inner sep=5pt},
+  layerlbl/.style={font=\sffamily\scriptsize\bfseries, text=black!55, anchor=north west, inner sep=3pt}
+}
+\newcommand{\st}[1]{«#1»}
+\newcommand{\ab}[1]{\textit{#1}}
+\newcommand{\gr}[1]{\textcolor{black!50}{#1}}
+
+\newsavebox{\cdfitbox}
+\newlength{\cdfitw}\newlength{\cdfith}\newlength{\cdfitmaxh}
+% scale the saved diagram to fit both the (rotated) line width and the page's short side
+\newcommand{\cdfit}{%
+  \setlength{\cdfitw}{\wd\cdfitbox}%
+  \setlength{\cdfith}{\dimexpr\ht\cdfitbox+\dp\cdfitbox\relax}%
+  \ifdim\dimexpr\linewidth*\cdfith/\cdfitw\relax>\cdfitmaxh
+    \resizebox{!}{\cdfitmaxh}{\usebox{\cdfitbox}}%
+  \else
+    \resizebox{\linewidth}{!}{\usebox{\cdfitbox}}%
+  \fi}
+
+\clearpage
+\newgeometry{margin=1.2cm,headsep=0.35cm,footskip=0.6cm}
+\begin{figure}[p]
+\centering
+\special{pdf:put @thispage << /Rotate 90 >>}%
+% minipage resets \textwidth, so take the page's short side here
+\setlength{\cdfitmaxh}{\dimexpr\textwidth-1.4cm\relax}%
+\rotatebox{90}{%
+\begin{minipage}{0.95\textheight}
+\centering
+\sbox{\cdfitbox}{%
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+% ===================== BOUNDARY =====================
+\node[cdbnd, anchor=north west] (main) at (0,0) {%
+  \textbf{RestaurantRush}
+  \nodepart{second} \gr{(no fields)}
+  \nodepart{third} \underline{+ main(args: String[])}};
+
+\node[cdbnd, anchor=north west] (view) at (0,-1.9) {%
+  \textbf{GameView}
+  \nodepart{second}
+  - in: Scanner\\
+  - echoInput: boolean
+  \nodepart{third}
+  + askStage(maxStage: int): int\\
+  + askSeed(): long\\
+  + showIntro(c: GameConfig, m: Menu)\\
+  + showTurnHeader(turn: int, r: Restaurant)\\
+  + showState(r: Restaurant, staff: List$<$Staff$>$, hh: HappyHour)\\
+  + askActivateHappyHour(): boolean\\
+  + showRecovery(c: Customer, before: int, after: int)\\
+  + chooseWaiterAction(w: Waiter): Waiter::Action\\
+  + chooseChefAction(chef: Chef, orders: List$<$Order$>$): Order\\
+  + chooseCustomer(title: String, cs: List$<$Customer$>$,\\\hspace*{1.2em}lastOption: String): Customer\\
+  + chooseTable(title: String, ts: List$<$Table$>$): Table\\
+  + chooseOrder(title: String, os: List$<$Order$>$,\\\hspace*{1.2em}lastOption: String): Order\\
+  + showAction(message: String)\\
+  + showError(reason: String)\\
+  + showPayment(c: Cashier, o: Order)\\
+  + showTurnEnd(turn: int, r: Restaurant)\\
+  + showFinalResult(r: Restaurant, paidOk: boolean,\\\hspace*{1.2em}revenueOk: boolean, satisfactionOk: boolean)};
+
+% ===================== CONTROL =====================
+\node[cdctl, anchor=north west] (ctrl) at (9.0,0) {%
+  \textbf{GameController}
+  \nodepart{second}
+  - config: GameConfig\\
+  - view: GameView\\
+  - restaurant: Restaurant\\
+  - menu: Menu\\
+  - rng: Random\\
+  - waiter: Waiter\\
+  - chef: Chef\\
+  - cashier: Cashier\\
+  - host: Host \gr{[0..1]}\\
+  - happyHour: HappyHour \gr{[0..1]}\\
+  - turn: int\\
+  - nextCustomerId: int
+  \nodepart{third}
+  + run()\\
+  - playTurn()\\
+  - arrivals()\\
+  - happyHourStart()\\
+  - managerChoices()\\
+  - hostTurn()\\
+  - waiterTurn()\\
+  - chefTurn()\\
+  - eatingAndPayment()\\
+  - waitingAndAbandonment()\\
+  - result()};
+
+\node[cdctl, anchor=north west] (config) at (15.0,0) {%
+  \textbf{GameConfig}
+  \nodepart{second}
+  \underline{+ MAX\_TURNS: int = 18}\\
+  \underline{+ TABLE\_COUNT: int = 2}\\
+  \underline{+ ARRIVAL\_TURNS: List$<$Integer$>$ = [1, 4, 7, 10, 13, 16]}\\
+  \underline{+ TARGET\_PAID: int = 4}\\
+  \underline{+ TARGET\_REVENUE\_CENTS: int = 4500}\\
+  \underline{+ TARGET\_AVG\_SATISFACTION: int = 60}\\
+  - stage: int\\
+  - seed: long
+  \nodepart{third}
+  + createArrival(turn: int, id: int): Customer\\
+  + hasHost(): boolean\\
+  + hasHappyHour(): boolean\\
+  + hasCombos(): boolean\\
+  + getStage(): int\\
+  + getSeed(): long};
+
+% ===================== STAFF =====================
+\node[cdent, anchor=north west] (result) at (23.4,0) {%
+  \textbf{ActionResult}
+  \nodepart{second}
+  - success: boolean\\
+  - message: String
+  \nodepart{third}
+  \underline{+ ok(message: String): ActionResult}\\
+  \underline{+ fail(reason: String): ActionResult}\\
+  + isSuccess(): boolean\\
+  + getMessage(): String};
+
+\node[cdnote, anchor=north west] (n4) at (29.2,0) {%
+  \textbf{Invalid actions.} Every staff action returns an \texttt{ActionResult}. After
+  \texttt{fail(reason)} the view prints the reason and asks for the same staff member again,
+  so the turn's task is not used up (brief \S3.4).};
+
+\node[cdabs, anchor=north west] (staff) at (23.4,-3.4) {%
+  \st{abstract}\\\textbf{\textit{Staff}}
+  \nodepart{second} - name: String
+  \nodepart{third}
+  + getLabel(): String\\
+  \ab{+ getRole(): String}\\
+  \ab{+ getDuty(): String}\\
+  \# seatCustomer(c: Customer, t: Table, r: Restaurant): ActionResult};
+
+\node[cdent, anchor=north west] (waiter) at (12.2,-10.2) {%
+  \textbf{Waiter}
+  \nodepart{second} \st{enumeration} Action \{SEAT, TAKE\_ORDER, SERVE, WAIT\}
+  \nodepart{third}
+  + seat(c: Customer, t: Table, r: Restaurant): ActionResult\\
+  + takeOrder(c: Customer, m: Menu, hh: HappyHour,\\\hspace*{1.2em}rng: Random, turn: int, r: Restaurant): ActionResult\\
+  + serve(o: Order, turn: int): ActionResult\\
+  + getRole(): String\\
+  + getDuty(): String};
+
+\node[cdent, anchor=north west] (chef) at (21.2,-10.2) {%
+  \textbf{Chef}
+  \nodepart{second} \gr{(no own fields)}
+  \nodepart{third}
+  + prepare(o: Order): ActionResult\\
+  + getRole(): String\\
+  + getDuty(): String};
+
+\node[cdent, anchor=north west] (cashier) at (26.2,-10.2) {%
+  \textbf{Cashier}
+  \nodepart{second} \gr{(no own fields)}
+  \nodepart{third}
+  + collectNext(r: Restaurant, turn: int): Order\\
+  + getRole(): String\\
+  + getDuty(): String};
+
+\node[cdent, anchor=north west] (host) at (32.6,-10.2) {%
+  \textbf{Host}
+  \nodepart{second} \gr{\{Stage 3\}}
+  \nodepart{third}
+  + seat(c: Customer, t: Table,\\\hspace*{1.2em}r: Restaurant): ActionResult\\
+  + getRole(): String\\
+  + getDuty(): String};
+
+% ===================== ENTITY (left column) =====================
+\node[cdent, anchor=north west] (rest) at (0,-11.8) {%
+  \textbf{Restaurant}
+  \nodepart{second}
+  - tables: List$<$Table$>$\\
+  - queue: WaitingQueue\\
+  - customers: List$<$Customer$>$\\
+  - orders: List$<$Order$>$\\
+  - revenueCents: int
+  \nodepart{third}
+  + Restaurant(tableCount: int)\\
+  + admit(c: Customer)\\
+  + removeFromQueue(c: Customer)\\
+  + seatAt(c: Customer, t: Table): ActionResult\\
+  + addOrder(o: Order)\\
+  + addRevenue(cents: int)\\
+  + releaseTable(c: Customer)\\
+  + depart(c: Customer)\\
+  + oldestReadyToPay(turn: int): Order\\
+  + getTables(): List$<$Table$>$ \gr{\{read-only\}}\\
+  + getFreeTables(): List$<$Table$>$\\
+  + hasSeatedCustomer(): boolean\\
+  + getCustomers(): List$<$Customer$>$ \gr{\{read-only\}}\\
+  + getOrders(): List$<$Order$>$ \gr{\{read-only\}}\\
+  + getKitchenOrders(): List$<$Order$>$\\
+  + hasCookableOrder(): boolean\\
+  + getPaidCount(): int\\
+  + getServedCount(): int\\
+  + getDepartedCount(): int\\
+  + getAverageSatisfaction(): Double\\
+  + getRevenueCents(): int};
+
+\node[cdent, anchor=north west] (queue) at (7.0,-11.8) {%
+  \textbf{WaitingQueue}
+  \nodepart{second} - customers: LinkedList$<$Customer$>$
+  \nodepart{third}
+  + add(c: Customer)\\
+  + remove(c: Customer)\\
+  + isEmpty(): boolean\\
+  + getAll(): List$<$Customer$>$};
+
+\node[cdnote=3.5cm, anchor=north west] (n3) at (0,-24.45) {%
+  \textbf{Composition.} \texttt{Restaurant} creates its two \texttt{Table}s and its
+  \texttt{WaitingQueue} itself. They are never shared or used outside it.};
+
+\node[cdent, anchor=north west] (table) at (0,-21.8) {%
+  \textbf{Table}
+  \nodepart{second}
+  - id: int\\
+  - customer: Customer \gr{[0..1]}
+  \nodepart{third}
+  + isFree(): boolean\\
+  + seat(c: Customer)\\
+  + release()};
+
+\node[cdent, anchor=north west] (hh) at (0,-25.9) {%
+  \textbf{HappyHour}
+  \nodepart{second}
+  \underline{- DURATION\_TURNS: int = 2}\\
+  \underline{- PRICE\_PERCENT: int = 80}\\
+  \underline{+ RECOVERY: int = 15}\\
+  - used: boolean\\
+  - turnsRemaining: int
+  \nodepart{third}
+  + isAvailable(): boolean\\
+  + isActive(): boolean\\
+  + activate()\\
+  + endTurn()\\
+  + apply(priceCents: int): int\\
+  + getTurnsRemaining(): int};
+
+\node[cdnote=4.3cm, anchor=north west] (n2) at (29.8,-25.0) {%
+  \textbf{Polymorphism.} \texttt{waitingAndAbandonment()} only calls
+  \texttt{c.loseSatisfaction()}, which uses the overridden \texttt{getSatisfactionLoss()}
+  (8, 5 or 12). The controller has no \texttt{instanceof} checks.};
+
+% ===================== ENTITY (customers and orders) =====================
+\node[cdabs, anchor=north west] (cust) at (6.9,-14.8) {%
+  \st{abstract}\\\textbf{\textit{Customer}}
+  \nodepart{second}
+  \underline{- MAX\_SATISFACTION: int = 100}\\
+  \underline{- COMBO\_CHANCE: double = 0.3}\\
+  - id: int\\
+  - satisfaction: int\\
+  - state: CustomerState\\
+  - table: Table \gr{[0..1]}\\
+  - order: Order \gr{[0..1]}\\
+  - recordedSatisfaction: int
+  \nodepart{third}
+  \ab{+ getSatisfactionLoss(): int}\\
+  \ab{+ applyDiscount(priceCents: int): int}\\
+  \ab{+ chooseItem(m: Menu, rng: Random): OrderItem}\\
+  \ab{+ getTypeLabel(): String}\\
+  + onServed(waitTurns: int)\\
+  \# pickDefault(m: Menu, rng: Random): OrderItem\\
+  \# adjustSatisfaction(delta: int)\\
+  + isWaitingForService(): boolean\\
+  + loseSatisfaction(): boolean\\
+  + recoverSatisfaction(amount: int)\\
+  + seatAt(t: Table)\\
+  + placeOrder(o: Order)\\
+  + receiveDish(waitTurns: int)\\
+  + finishEating()\\
+  + recordSatisfaction()\\
+  + markPaid()\\
+  + leave()\\
+  + getName(): String};
+
+\node[cdent, anchor=north west] (regular) at (6.6,-25.2) {%
+  \textbf{RegularCustomer}
+  \nodepart{second} \gr{\{loss 8, full price\}}
+  \nodepart{third}
+  + getSatisfactionLoss(): int\\
+  + applyDiscount(priceCents: int): int\\
+  + chooseItem(m: Menu, rng: Random): OrderItem\\
+  + getTypeLabel(): String};
+
+\node[cdent, anchor=north west] (vip) at (13.6,-25.2) {%
+  \textbf{VIPCustomer}
+  \nodepart{second} \underline{- DISCOUNT\_PERCENT: int = 10}
+  \nodepart{third}
+  + getSatisfactionLoss(): int\\
+  + applyDiscount(priceCents: int): int\\
+  + chooseItem(m: Menu, rng: Random): OrderItem\\
+  + getTypeLabel(): String};
+
+\node[cdent, anchor=north west] (critic) at (20.6,-25.2) {%
+  \textbf{CriticCustomer}
+  \nodepart{second}
+  \underline{- FAST\_SERVICE\_TURNS: int = 2}\\
+  \underline{- FAST\_BONUS: int = 5}\\
+  \underline{- SLOW\_PENALTY: int = 10}
+  \nodepart{third}
+  + getSatisfactionLoss(): int\\
+  + applyDiscount(priceCents: int): int\\
+  + chooseItem(m: Menu, rng: Random): OrderItem\\
+  + onServed(waitTurns: int)\\
+  + getTypeLabel(): String};
+
+\node[cdent, anchor=north west] (order) at (14.6,-14.8) {%
+  \textbf{Order}
+  \nodepart{second}
+  - customer: Customer \{readOnly\}\\
+  - item: OrderItem \{readOnly\}\\
+  - priceCents: int \{readOnly\}\\
+  - turnPlaced: int \{readOnly\}\\
+  - status: OrderStatus\\
+  - prepDone: int\\
+  - turnServed: int\\
+  - turnReadyToPay: int
+  \nodepart{third}
+  + advancePrep()\\
+  + markServed(turn: int)\\
+  + markReadyToPay(turn: int)\\
+  + markPaid()\\
+  + cancel()\\
+  + isReady(): boolean\\
+  + isInKitchen(): boolean\\
+  + getProgress(): String\\
+  + getPriceCents(): int};
+
+\node[cdenum, anchor=north west] (cstate) at (14.6,-21.6) {%
+  \st{enumeration}\\\textbf{CustomerState}
+  \nodepart{second}
+  WAITING, SEATED, ORDERED,\\EATING, READY\_TO\_PAY,\\PAID, LEFT
+  \nodepart{third} \gr{(no operations)}};
+
+\node[cdenum, anchor=north west] (ostatus) at (20.2,-14.8) {%
+  \st{enumeration}\\\textbf{OrderStatus}
+  \nodepart{second}
+  PLACED, COOKING, READY,\\SERVED, READY\_TO\_PAY,\\PAID, CANCELLED
+  \nodepart{third} \gr{(no operations)}};
+
+\node[cdnote=4.4cm, anchor=north west] (n1) at (20.2,-17.3) {%
+  \textbf{Encapsulation.} \texttt{priceCents} is private and final with no setter.
+  \texttt{Waiter.takeOrder()} applies \texttt{applyDiscount()} and then
+  \texttt{HappyHour.apply()} once, so the price is locked when the order is taken.};
+
+% ===================== ENTITY (menu) =====================
+\node[cdent, anchor=north west] (menu) at (25.6,-13.9) {%
+  \textbf{Menu}
+  \nodepart{second}
+  - dishes: List$<$OrderItem$>$\\
+  - combos: List$<$ComboMeal$>$
+  \nodepart{third}
+  + Menu(includeCombos: boolean)\\
+  + getDishes(): List$<$OrderItem$>$\\
+  + getCombos(): List$<$ComboMeal$>$\\
+  + hasCombos(): boolean\\
+  + getItems(): List$<$OrderItem$>$};
+
+\node[cdint, anchor=north west] (item) at (26.4,-17.5) {%
+  \st{interface}\\\textbf{OrderItem}
+  \nodepart{second} \gr{(no fields)}
+  \nodepart{third}
+  \ab{+ getName(): String}\\
+  \ab{+ getPriceCents(): int}\\
+  \ab{+ getPrepUnits(): int}};
+
+\node[cdenum, anchor=north west] (menuitem) at (25.0,-20.4) {%
+  \st{enumeration}\\\textbf{MenuItem}
+  \nodepart{second}
+  SALAD("Salad", 900, 1)\\
+  BURGER("Burger", 1500, 1)\\
+  PASTA("Pasta", 1800, 2)\\
+  - name: String\\
+  - priceCents: int\\
+  - prepUnits: int
+  \nodepart{third}
+  + getName(): String\\
+  + getPriceCents(): int\\
+  + getPrepUnits(): int\\
+  \underline{+ formatPrice(cents: int): String}};
+
+\node[cdent, anchor=north west] (combo) at (31.4,-20.4) {%
+  \textbf{ComboMeal}
+  \nodepart{second}
+  \underline{- COMBO\_PERCENT: int = 90}\\
+  - first: MenuItem\\
+  - second: MenuItem
+  \nodepart{third}
+  + ComboMeal(first: MenuItem, second: MenuItem)\\
+  + getName(): String\\
+  + getPriceCents(): int\\
+  + getPrepUnits(): int};
+
+% ===================== LAYER PANELS =====================
+\coordinate (mainTop) at ($(main.north west)+(0,0.45)$);
+\coordinate (ctrlTop) at ($(ctrl.north west)+(0,0.45)$);
+\coordinate (resultTop) at ($(result.north west)+(0,0.45)$);
+\coordinate (restTop) at ($(rest.north west)+(0,0.45)$);
+\begin{scope}[on background layer]
+  \node[layer=boundarybg!45, fit=(main)(view)(mainTop)] (Lb) {};
+  \node[layerlbl] at (Lb.north west) {Boundary};
+  \node[layer=controlbg!45, fit=(ctrl)(config)(ctrlTop)] (Lc) {};
+  \node[layerlbl] at (Lc.north west) {Control};
+  \node[layer=abstractbg!55, fit=(result)(staff)(n4)(resultTop)] (Ls1) {};
+  \node[layerlbl] at (Ls1.north west) {Staff};
+  \node[layer=abstractbg!55, fit=(waiter)(chef)(cashier)(host)] (Ls2) {};
+  \node[elayer=classbg!45, fit=(rest)(queue)(table)(n3)(hh)(restTop)] (Le1) {};
+  \node[elayer=classbg!45, fit=(cust)(order)(cstate)(ostatus)(n1)(menu)(item)(menuitem)(combo)(regular)(vip)(critic)(n2)] (Le2) {};
+  \node[layerlbl] at (Le1.north west) {Entity};
+\end{scope}
+
+
+% ===================== RELATIONSHIPS =====================
+% --- boundary
+\draw[dep] (main.east) -- node[rel, above]{\st{create}} (main.east -| ctrl.west);
+\draw[dep] (main.south) -- (main.south |- view.north);
+\draw[assoc] (ctrl.west |- 0,-4.2) -- node[mult, above, pos=0.8]{1} node[rel, below, pos=0.65]{-view} (view.east |- 0,-4.2);
+
+% --- control
+\draw[assoc] (ctrl.east |- 0,-1.6) -- node[mult, above, pos=0.85]{1} node[rel, below, pos=0.6]{-config} (config.west |- 0,-1.6);
+\draw[dep] (ctrl.east |- 0,-6.4) -- (22.9,-6.4) |- node[rel, right, pos=0.3]{\st{use}} (result.west);
+\draw[comp] (9.3,0 |- ctrl.south) -- (9.3,-10.65) -- (3.0,-10.65) -- node[mult, right, pos=0.6]{1} node[rel, left, pos=0.6]{-restaurant} (3.0,0 |- rest.north);
+\draw[comp] (9.7,0 |- ctrl.south) -- (9.7,-10.95) -- (-0.6,-10.95) |- node[rel, left, pos=0.44, align=right]{-happyHour\\0..1} (hh.west);
+\draw[comp] (12.6,0 |- ctrl.south) -- node[mult, right, pos=0.8]{1} node[rel, left, pos=0.8]{-waiter} (12.6,0 |- waiter.north);
+\draw[comp] (ctrl.east |- 0,-7.2) -- (22.2,-7.2) -- node[mult, left, pos=0.92]{1} node[rel, right, pos=0.2]{-chef} (22.2,0 |- chef.north);
+\draw[comp] (ctrl.east |- 0,-7.55) -- (27.6,-7.55) -- node[mult, left, pos=0.92]{1} node[rel, right, pos=0.2]{-cashier} (27.6,0 |- cashier.north);
+\draw[comp] (ctrl.east |- 0,-7.9) -- (33.6,-7.9) -- node[mult, left, pos=0.9]{0..1} node[rel, right, pos=0.2]{-host} (33.6,0 |- host.north);
+
+% --- staff
+\draw[link] (18.0,0 |- waiter.north) -- (18.0,-9.4) -- (35.6,-9.4);
+\draw[link] (24.2,0 |- chef.north) -- (24.2,-9.4);
+\draw[link] (30.2,0 |- cashier.north) -- (30.2,-9.4);
+\draw[link] (35.6,0 |- host.north) -- (35.6,-9.4);
+\draw[inh] (28.9,-9.4) -- (28.9,0 |- staff.south);
+\draw[dep] (25.5,0 |- staff.north) -- node[rel, right]{\st{use}} (25.5,0 |- result.south);
+\draw[dashed, black!50] (n4.west |- result.east) -- (result.east);
+
+% --- restaurant
+\draw[comp] (rest.east |- 0,-12.8) -- node[mult, above, pos=0.7]{1} (queue.west |- 0,-12.8);
+\draw[comp] (0.6,0 |- rest.south) -- node[mult, right, pos=0.7]{2} node[rel, left, pos=0.5]{-tables} (0.6,0 |- table.north);
+\draw[aggr] (rest.east |- 0,-16.9) -- node[mult, above, pos=0.75]{0..*} (cust.west |- 0,-16.9);
+\draw[aggr] (rest.east |- 0,-14.45) -- (15.4,-14.45) -- node[mult, right, pos=0.5]{0..*} (15.4,0 |- order.north);
+\draw[aggr] (10.6,0 |- queue.south) -- node[mult, right, pos=0.6]{0..*} (10.6,0 |- cust.north);
+\draw[dashed, black!50] (n3.north) -- (n3.north |- table.south);
+
+% --- customers
+\draw[link] (table.east |- 0,-22.9) -- node[mult, above, pos=0.15]{0..1} node[mult, above, pos=0.85]{0..1} node[rel, below]{seats} (cust.west |- 0,-22.9);
+\draw[link] (cust.east |- 0,-16.2) -- node[mult, above, pos=0.2]{1} node[mult, above, pos=0.8]{0..1} node[rel, below]{places} (order.west |- 0,-16.2);
+\draw[assoc] (cust.east |- 0,-22.6) -- node[mult, above, pos=0.75]{1} node[rel, below, pos=0.5]{-state} (cstate.west |- 0,-22.6);
+\draw[link] (9.9,0 |- regular.north) -- (9.9,-24.85) -- (23.9,-24.85);
+\draw[link] (16.9,0 |- vip.north) -- (16.9,-24.85);
+\draw[link] (23.9,0 |- critic.north) -- (23.9,-24.85);
+\draw[inh] (11.5,-24.85) -- (11.5,0 |- cust.south);
+\draw[dashed, black!50] (n2.west |- 0,-25.7) -- (critic.east |- 0,-25.7);
+
+% --- orders and menu
+\draw[assoc] (order.east |- 0,-15.9) -- node[mult, above, pos=0.7]{1} node[rel, below, pos=0.5]{-status} (ostatus.west |- 0,-15.9);
+\draw[assoc] (order.east |- 0,-19.0) -- node[mult, above, pos=0.92]{1} node[rel, below, pos=0.8]{-item} (item.west |- 0,-19.0);
+\draw[dashed, black!50] (n1.west) -- (n1.west -| order.east);
+\draw[aggr] (27.9,0 |- menu.south) -- node[mult, right, pos=0.7]{0..*} node[rel, left, pos=0.6]{-dishes} (27.9,0 |- item.north);
+\draw[aggr] (menu.east |- 0,-15.6) -- (34.3,-15.6) -- node[mult, right, pos=0.85]{0..6} node[rel, left, pos=0.85]{-combos} (34.3,0 |- combo.north);
+\draw[real] (27.0,0 |- menuitem.north) -- (27.0,0 |- item.south);
+\draw[real] (32.4,0 |- combo.north) -- (32.4,-20.1) -- (29.0,-20.1) -- (29.0,0 |- item.south);
+\draw[aggr] (combo.west |- 0,-21.4) -- node[mult, above, pos=0.85]{2} node[rel, below, pos=0.6]{-first, -second} (menuitem.east |- 0,-21.4);
+
+
+\end{tikzpicture}}%
+\cdfit
+\caption{Final class diagram (Stage~3). Plain getters and constructors that only copy their
+arguments are omitted. Relationships that are not drawn are listed in Table~\ref{tab:relationships}.}
+\label{fig:class-full}
+\end{minipage}}
+\end{figure}
+\clearpage
+\restoregeometry
+
+\subsection{Relationships}
+
+Table~\ref{tab:relationships} lists every relationship in the final design, including the
+ones we left out of the figure to avoid crossing lines.
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{6.3cm}@{}}
+\caption{Relationships in the final design}\label{tab:relationships}\\
+\toprule
+\textbf{From} & \textbf{Kind} & \textbf{To (mult.)} & \textbf{Where it shows up in the code} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{From} & \textbf{Kind} & \textbf{To (mult.)} & \textbf{Where it shows up in the code} \\
+\midrule
+\endhead
+RegularCustomer, VIPCustomer, CriticCustomer & generalisation & Customer & each overrides the four abstract operations; only the Critic overrides \texttt{onServed()} \\
+Waiter, Chef, Cashier, Host & generalisation & Staff & each implements \texttt{getRole()} and \texttt{getDuty()}; Waiter and Host share \texttt{seatCustomer()} \\
+MenuItem, ComboMeal & realisation & OrderItem & \texttt{Order} and \texttt{Chef} only see \texttt{OrderItem} \\
+GameController & composition & Restaurant (1), Menu (1) & created in the controller's constructor \\
+GameController & composition & Waiter, Chef, Cashier (1 each) & field initialisers in \texttt{GameController} \\
+GameController & composition & Host (0..1), HappyHour (0..1) & created only when \texttt{config.hasHost()} / \texttt{hasHappyHour()}, otherwise \texttt{null} (Stages 1 and 2) \\
+GameController & association & GameView (1), GameConfig (1) & passed into the constructor by \texttt{main()} \\
+Restaurant & composition & Table (2), WaitingQueue (1) & created by \texttt{Restaurant} itself \\
+Restaurant & aggregation & Customer (0..*), Order (0..*) & customers and orders are also referenced by tables, the queue and each other \\
+WaitingQueue & aggregation & Customer (0..*) & a customer leaves the queue but keeps existing \\
+Table & association & Customer (0..1 -- 0..1) & \texttt{Table.customer} and \texttt{Customer.table} \\
+Customer & association & Order (1 -- 0..1) & \texttt{Order.customer} and \texttt{Customer.order} \\
+Customer, Order & association & CustomerState, OrderStatus (1) & \texttt{state} and \texttt{status} fields \\
+Order & association & OrderItem (1) & \texttt{Order.item} \\
+Menu & aggregation & OrderItem (3), ComboMeal (0..6) & \texttt{dishes} and \texttt{combos}; six combos only when \texttt{includeCombos} is true \\
+ComboMeal & aggregation & MenuItem (2) & \texttt{first}, \texttt{second}; enum constants are shared, so this is not composition \\
+Staff, Restaurant, GameController & dependency «use» & ActionResult & returned by \texttt{seat}, \texttt{takeOrder}, \texttt{serve}, \texttt{prepare} and \texttt{Restaurant.seatAt}; read by the controller \\
+Waiter & dependency & Menu, HappyHour, Order & parameters of \texttt{takeOrder()} and \texttt{serve()}; \texttt{takeOrder()} creates the \texttt{Order} \\
+Cashier & dependency & Restaurant, Order & \texttt{collectNext(r, turn)} returns the paid \texttt{Order} or \texttt{null} \\
+Customer & dependency & Menu & parameter of \texttt{chooseItem()} and \texttt{pickDefault()} \\
+GameConfig & dependency «create» & Customer subclasses & \texttt{createArrival()} instantiates them \\
+GameView & dependency & Restaurant, Staff, HappyHour, Order, Table & read-only parameters of the display and choice methods \\
+RestaurantRush & dependency «create» & GameController, GameView, GameConfig & \texttt{main()} creates and wires them \\
+\bottomrule
+\end{longtable}
+
+\subsection{Encapsulation, Polymorphism and Composition}
+\begin{sloppypar}
+
+\paragraph{Encapsulation.} All instance fields are private; the only public fields are
+\texttt{static final} constants (the base setting in \texttt{GameConfig} and
+\texttt{HappyHour.RECOVERY}). State changes go through methods that check the current state first. \texttt{Order.advancePrep()} only accepts an order that is
+\texttt{PLACED} or \texttt{COOKING} and turns it \texttt{READY} after its last unit.
+\texttt{Restaurant.seatAt()} refuses a customer who is not \texttt{WAITING} and a table that is
+already occupied, and returns the reason in an \texttt{ActionResult}. \texttt{Order.priceCents}
+is final and has no setter, which is how we meet the rule that a price is locked when the order
+is taken. \texttt{WaitingQueue.getAll()} and \texttt{Restaurant.getOrders()} return read-only
+lists, so \texttt{GameView} can print the state but cannot change it.
+
+\paragraph{Polymorphism.} The three customer types differ only through overridden methods:
+\texttt{getSatisfactionLoss()} (8, 5, 12), \texttt{applyDiscount()} (the VIP takes 10\% off),
+\texttt{chooseItem()} (the Critic always picks the most expensive single dish, never a combo)
+and \texttt{onServed()} (the Critic gains 5 if served within two turns of ordering and loses 10
+otherwise). \texttt{GameController} and \texttt{Waiter} only ever hold a \texttt{Customer}
+reference, and \texttt{Waiter.serve()} calls \texttt{receiveDish()}, which calls the overridden
+\texttt{onServed()}. The same idea applies to \texttt{OrderItem}: \texttt{Chef.prepare()} works on
+a \texttt{ComboMeal} exactly as on a \texttt{MenuItem}, because \texttt{Order.advancePrep()} only
+calls \texttt{getPrepUnits()}.
+
+\paragraph{Composition and aggregation.} \texttt{Restaurant} owns its tables and its waiting
+queue, and \texttt{GameController} owns the \texttt{Restaurant}, the \texttt{Menu}, the staff and
+the optional \texttt{Host} and \texttt{HappyHour}; none of these outlive their owner. We used
+aggregation where the parts are shared. Customers are referenced from the restaurant, the queue
+and a table at the same time, and a \texttt{ComboMeal} points to two \texttt{MenuItem} constants
+that every other order also uses.
+\end{sloppypar}
+

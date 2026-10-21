@@ -1,0 +1,124 @@
+\section{Design Discussion}
+\sloppy
+
+\subsection{Key Abstractions and Responsibilities}
+
+We split the classes into entity, staff, and control/boundary groups. Each class below has a job that can be stated in one line, which we used as a quick cohesion test while refactoring between stages.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm}X}
+\toprule
+\textbf{Abstraction} & \textbf{Responsibility} \\
+\midrule
+\multicolumn{2}{l}{\textit{Entity}} \\
+\texttt{Customer} (abstract) & Owns satisfaction (kept in $[0,100]$), lifecycle state (\texttt{CustomerState}) and the satisfaction recorded at payment. Leaves the type-specific rules (loss per turn, discount, food choice, reaction to service) to subclasses. \\
+\texttt{RegularCustomer},\newline \texttt{VIPCustomer},\newline \texttt{CriticCustomer} & One concrete rule set each. Only \texttt{GameConfig.createArrival()} knows which one is being created. \\
+\texttt{OrderItem} (interface) & What the rest of the program needs to know about food: name, price in cents, preparation units. \\
+\texttt{MenuItem} (enum), \texttt{ComboMeal} & The three fixed dishes; a combo composed of two \texttt{MenuItem}s that derives its own price (90\%, nearest cent) and units (sum). \\
+\texttt{Menu} & The single dishes (\texttt{getDishes()}) and, in Stage~3, every pair of dishes as a combo (\texttt{getCombos()}); \texttt{getItems()} returns both for display. \\
+\texttt{Order} & Locks the price when the order is taken and tracks preparation progress, \texttt{OrderStatus}, and the turns on which it was served and became \texttt{READY\_TO\_PAY}. \\
+\texttt{Table}, \texttt{WaitingQueue} & One customer per table; arrivals kept in FIFO order. \\
+\texttt{Restaurant} & Aggregate state: tables, queue, customers, orders and revenue, plus the shared rules on that state (\texttt{seatAt()}, \texttt{depart()}, \texttt{oldestReadyToPay()}) and the statistics (paid count, average recorded satisfaction). \\
+\texttt{HappyHour} & A once-per-game pricing policy with its own lifecycle: available, active for two turns, used. \\
+\midrule
+\multicolumn{2}{l}{\textit{Staff}} \\
+\texttt{Staff} (abstract) & Name, role and a one-line duty. \texttt{GameView} lists the staff on duty through this type without knowing the roles. \\
+\texttt{Waiter}, \texttt{Chef}, \texttt{Cashier}, \texttt{Host} & Each checks the rules of its own task (seat, take an order or serve; prepare one unit; collect the oldest eligible bill; seat one extra customer) and returns an \texttt{ActionResult} (the Cashier returns the paid \texttt{Order} or \texttt{null}). \\
+\texttt{ActionResult} & Success flag plus a message. A failed action carries the reason shown to the player and does not use up the staff task. \\
+\midrule
+\multicolumn{2}{l}{\textit{Control and boundary}} \\
+\texttt{GameConfig} & Base setting constants, the arrival schedule and the stage switches (which customer types arrive; whether Host, combos and Happy Hour exist). \\
+\texttt{GameController} & Runs the six turn steps in order and asks the right staff object to act. It also keeps the rules that depend only on the turn number: when eating finishes and when Happy Hour recovery applies. \\
+\texttt{GameView} & All console input and output. Collects the manager's choices and prints state; contains no game rules. \\
+\texttt{RestaurantRush} & Entry point: reads stage and seed, creates the view and the controller. \\
+\bottomrule
+\end{tabularx}
+\caption{Key abstractions and their responsibilities}
+\end{table}
+
+The main cohesion fix during development was moving staff behaviour out of \texttt{GameController}. In our first draft the controller seated customers, priced orders and collected payments itself, so it had a reason to change for almost every rule in the brief. After the split, ``only a dish that is already \texttt{READY} can be served'' lives in \texttt{Waiter.serve()}, the seating checks live in \texttt{Restaurant.seatAt()} (shared by the Waiter and the Host), and the controller only decides \emph{when} each staff member acts. The rule that a dish finished this turn is served next turn at the earliest follows from that ordering: the Waiter is asked before the Chef.
+
+\subsection{Design Principles}
+
+We only list principles that we can point to in the code. Where a principle is applied partly, we say so.
+
+\paragraph{Single Responsibility (SRP).}
+\texttt{GameView} changes only if the console layout changes. The pricing order (customer discount first, then Happy Hour) is in one place, \texttt{Waiter.takeOrder()}, and the price is then fixed inside \texttt{Order}. The average satisfaction of paid customers is computed once, in \texttt{Restaurant.getAverageSatisfaction()}, and reused by the turn header, the end-of-turn summary and the final result check. The weakest class here is \texttt{GameController}: besides sequencing the turn, it still holds the eating and Happy Hour timing, so a change to either rule would touch it.
+
+\paragraph{Open/Closed (OCP).}
+Stage~2 added two customer types without editing \texttt{GameController}: \texttt{VIPCustomer} and \texttt{CriticCustomer} override \texttt{getSatisfactionLoss()}, \texttt{applyDiscount()}, \texttt{chooseItem()} and \texttt{onServed()}. The only rule code we changed was \texttt{GameConfig.createArrival()}, which decides who arrives on turns 7 and 13. We did have to open \texttt{Customer} once, to add the \texttt{onServed()} hook, because Stage~1 gave a customer no way to react to slow service; \texttt{Waiter.serve()} now passes the waiting time to it. \texttt{GameView} and \texttt{RestaurantRush} also gained a stage menu. In Stage~3, \texttt{ComboMeal} is a new \texttt{OrderItem}, and \texttt{Order}, \texttt{Chef} and \texttt{Cashier} were not changed at all because they already worked against the interface. The customer side needed one small edit: \texttt{Customer.pickDefault()} gained the 30\% combo branch, guarded by \texttt{menu.hasCombos()} so Stage~1 and~2 games draw exactly the same random numbers as before. OCP is not complete everywhere: Happy Hour needed a new parameter on \texttt{Waiter.takeOrder()} and a new phase in \texttt{GameController}, and a fifth staff role would need the same.
+
+\paragraph{Liskov Substitution (LSP).}
+Every \texttt{Customer} subtype keeps the base-class contract: the loss per turn is positive, \texttt{applyDiscount()} never returns more than its input, \texttt{chooseItem()} always returns an item from the given \texttt{Menu} (the Critic picks from \texttt{getDishes()}, which is a subset), and satisfaction stays in $[0,100]$ because subclasses can only change it through the protected \texttt{adjustSatisfaction()}, which clamps. This is why \texttt{GameController} can loop over all customers in the abandonment step without special cases. The same holds for a \texttt{ComboMeal} used wherever a \texttt{MenuItem} is expected.
+
+\paragraph{Interface Segregation (ISP).}
+\texttt{OrderItem} has three methods. \texttt{GameView} uses all three to print the menu, \texttt{Order} needs the preparation units, and \texttt{Waiter} needs the name and price. Splitting it further would give one-method interfaces with the same two implementers. We deliberately did not add interfaces such as \texttt{Seatable} or \texttt{Payable}: each would have had exactly one implementer, and the brief warns against interfaces created only to satisfy a checklist.
+
+\paragraph{Dependency Inversion (DIP), partly applied.}
+For the parts that vary, high-level code depends on abstractions: \texttt{GameController}, the staff classes and \texttt{GameView} work with \texttt{Customer}, \texttt{OrderItem} and \texttt{Staff}. The concrete customer classes are named only in \texttt{GameConfig.createArrival()}, and \texttt{ComboMeal} is constructed only in \texttt{Menu}. We did not invert the staff dependency: \texttt{GameController} constructs \texttt{Waiter}, \texttt{Chef}, \texttt{Cashier} and \texttt{Host} itself. Each role has one implementation and a different action method, so a shared ``perform action'' interface would have been artificial.
+
+\subsection{Extensibility Walkthrough}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm}X}
+\toprule
+\textbf{Change} & \textbf{What has to be touched} \\
+\midrule
+New customer type (e.g.\ a ``Family'' that loses 4 per turn) & One new subclass of \texttt{Customer}; one line in \texttt{GameConfig.createArrival()}. Controller, staff and view unchanged. \\
+New menu item (e.g.\ Soup, \$6, 1 unit) & One enum constant in \texttt{MenuItem}. Combos including Soup appear automatically because \texttt{Menu} builds the pairs from \texttt{MenuItem.values()}, and the Critic considers it automatically. \\
+New pricing policy (e.g.\ a lunch discount) & A class like \texttt{HappyHour}, a parameter on \texttt{Waiter.takeOrder()}, and an activation step in \texttt{GameController}. If several policies were needed we would introduce a \texttt{PricingPolicy} interface at that point, not before. \\
+Different base setting (more tables, longer game, other targets) & Constants in \texttt{GameConfig} only. \\
+\bottomrule
+\end{tabularx}
+\caption{Cost of likely future changes}
+\end{table}
+
+\subsection{Trade-offs}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm}XX}
+\toprule
+\textbf{Decision} & \textbf{Why we chose it} & \textbf{What it costs} \\
+\midrule
+\texttt{ActionResult} instead of exceptions for invalid choices & An invalid choice is a normal part of play, not an error. The view prints the reason and asks the same staff member again, so the task is not used up. & Every caller must check \texttt{isSuccess()}; in our code the three choice loops in \texttt{GameController} do this. \\
+\texttt{Restaurant} aggregate & One object to pass to staff methods instead of four lists; seating and payment rules sit next to the data they check. & \texttt{Restaurant} is a larger class, and every staff method can see all state. \\
+\texttt{MenuItem} as an enum & Fixed set of dishes, safe identity comparison, \texttt{values()} for building combos. & Dishes cannot be loaded from a file at run time without changing the type. \\
+Stage switches in \texttt{GameConfig} & The final build can run all three stages for testing and the video, and the stage differences are in one place. & The controller still has \texttt{host != null} and \texttt{happyHour != null} checks. The tags \texttt{stage-1} and \texttt{stage-2} do not contain this code at all. \\
+Controller still sequences the steps & The six steps must run in a fixed order; keeping that order in one short method (\texttt{playTurn()}) matches the brief and is easy to debug. & \texttt{GameController} is the class most likely to change when a timing rule changes. \\
+\bottomrule
+\end{tabularx}
+\caption{Main design trade-offs}
+\end{table}
+
+\subsection{Alternative Design Considered: State Pattern for the Customer Lifecycle}
+
+We considered replacing \texttt{CustomerState} and \texttt{OrderStatus} with State objects (\texttt{WaitingState}, \texttt{SeatedState}, \texttt{EatingState}, \ldots), each deciding whether satisfaction drops and which transition comes next. This would remove state checks such as \texttt{Customer.isWaitingForService()} and the status tests in \texttt{Waiter.serve()} and \texttt{Chef.prepare()}.
+
+We rejected it for three reasons. First, the lifecycle is a straight line with one exit (leaving at 0 satisfaction), and the guards we already have reject every illegal move: \texttt{Waiter.serve()} only accepts a \texttt{READY} order, \texttt{Chef.prepare()} only a \texttt{PLACED} or \texttt{COOKING} one, and \texttt{Restaurant.oldestReadyToPay()} only returns an order that became \texttt{READY\_TO\_PAY} on an earlier turn. Second, the variation the brief actually asks for is \emph{between customer types}, not between states, and subclassing \texttt{Customer} already handles it. Combining both would mean every State class asks the customer for its type-specific numbers, which adds indirection without new behaviour. Third, the timing rules (``served on an earlier turn'', ``ready to pay on an earlier turn'') compare turn numbers stored in \texttt{Order}, which is simpler to check in one place than across seven State classes. If a later stage added branching lifecycles, for example take-away orders that skip the table, we would revisit this.
+
+\subsection{How the Player's Choices Change the Result}
+
+The Waiter has one task per turn, so most turns force a real choice. We replayed the following case in the Stage~1 build (seed 42), once for each option, and the numbers below are from those runs.
+
+At the start of turn 4, Regular~\#1's Pasta is \texttt{READY} (satisfaction 76), Regular~\#2 has just arrived (100), and Table~2 is free.
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Serve first.} Regular~\#1 stops losing satisfaction, finishes eating on turn 5 and pays \$18.00 on turn 6 with 76 recorded. Regular~\#2 stays in the queue and ends turn 4 at 92; it can be seated on turn 5.
+  \item \textbf{Seat first.} Regular~\#2 also ends turn 4 at 92, because being seated does not stop the loss; only being served does. Regular~\#1 drops to 68, is served on turn 5 and pays on turn 7 with 68 recorded, so Table~1 is freed one turn later.
+\end{itemize}
+
+Seating first gains Regular~\#2 one turn (the order can be taken on turn 5 instead of 6), but the 8 points Regular~\#1 loses are recorded at payment and stay in the average for the rest of the game. With four paid customers, that single decision lowers the final average by 2 points, so a manager who repeatedly delays ready dishes eats into the margin above the target of 60.
+
+Other choices with a measurable effect:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Chef priority.} A Pasta needs two Chef turns. Cooking a newly ordered Salad first finishes that order a turn earlier, but the Pasta customer loses 8 (Regular), 5 (VIP) or 12 (Critic) for every extra turn.
+  \item \textbf{Critic timing.} The Critic always orders the most expensive single dish, Pasta. Served within two turns of ordering it gains 5; three or more turns costs 10, a 15-point swing on one customer. The bonus is only reachable if the Chef cooks the Pasta on the turn it is ordered and on the next turn, and the Waiter serves it on the turn after that.
+  \item \textbf{Happy Hour timing.} On each of its two turns, every customer still waiting for a table or for food gets 15 back (capped at 100). This includes seated customers whose dish has not been served, so with two such customers it can restore up to 60 points. Customers who are eating, ready to pay or have paid get nothing. Activated when nobody is waiting for service, it only gives the 20\% discount, which lowers revenue and makes the \$45 target harder.
+\end{itemize}
+\fussy

@@ -1,0 +1,166 @@
+\section{GitHub Evidence and Stage Transitions}
+
+\subsection{Repository and Tags}
+
+All work is kept in one repository:
+\begin{center}\url{https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush}\end{center}
+Each stage is marked with a tag on a commit that compiles and runs on its own
+(\texttt{javac -d bin src/restaurantrush/*.java}). Checking out a tag gives exactly the
+code that existed at the end of that stage, together with the input scripts and recorded
+console output for that stage's runs in \texttt{test-runs/}.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Tag} & \textbf{What the snapshot contains} \\
+\midrule
+\texttt{stage-1} & 20 source files: Regular customers, the three menu items, \texttt{Waiter}, \texttt{Chef}, \texttt{Cashier},
+\texttt{Table}, \texttt{Order}, \texttt{WaitingQueue}, \texttt{Restaurant}, \texttt{ActionResult}, the full six-step turn,
+abandonment, payment and both endings. Searching the snapshot for ``VIP'', ``Critic'', ``Host'', ``combo'' and
+``Happy Hour'' finds nothing (the only hits are the words ``unhappy departures'' in the end-of-turn display). \\
+\texttt{stage-2} & 22 source files: everything in \texttt{stage-1} plus \texttt{VIPCustomer} and \texttt{CriticCustomer}.
+The arrivals on turns 7 and 13 become a VIP and a Critic, so there are still six arrivals, and the game asks which stage to play. \\
+\texttt{stage-3} & 25 source files: everything in \texttt{stage-2} plus \texttt{Host}, \texttt{ComboMeal} and \texttt{HappyHour}.
+This is the build the class diagram in Section~\ref{sec:class} describes. \\
+\bottomrule
+\end{tabularx}
+\caption{Contents of each tagged snapshot}
+\end{table}
+
+The tables below were produced from \texttt{git diff --numstat} between the tags, so they match what the
+compare links show. Changes to \texttt{README.md}, \texttt{TESTING.md} and \texttt{test-runs/} are left out
+of the tables; they only document the new stage.
+
+\subsection{Stage 1 $\rightarrow$ Stage 2}
+
+Compare link:
+\begin{center}{\small\url{https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush/compare/stage-1...stage-2}}\end{center}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l l r X}
+\toprule
+\textbf{Change} & \textbf{File} & \textbf{+/$-$} & \textbf{Why it was needed} \\
+\midrule
+New & \texttt{VIPCustomer.java} & 38/0 & Overrides \texttt{getSatisfactionLoss()} (5) and \texttt{applyDiscount()} (10\% off). \\
+New & \texttt{CriticCustomer.java} & 57/0 & Loss of 12, always picks the most expensive dish, and reacts to service speed in \texttt{onServed()}. \\
+Changed & \texttt{GameConfig.java} & 19/3 & Stores the chosen stage; \texttt{createArrival()} returns a VIP on turn 7 and a Critic on turn 13 from Stage~2. \\
+Changed & \texttt{Customer.java} & 9/1 & Adds the empty \texttt{onServed(int waitTurns)} hook, called from \texttt{receiveDish()}, so the Critic can react without the controller knowing it is a Critic. \\
+Changed & \texttt{Waiter.java} & 9/2 & \texttt{serve()} passes the wait (serve turn minus order turn) to \texttt{receiveDish()} and reports any reaction in its message. \\
+Changed & \texttt{GameView.java} & 23/1 & New \texttt{askStage()} prompt; the banner shows the stage. \\
+Changed & \texttt{RestaurantRush.java} & 2/1 & Asks for the stage and passes it to \texttt{GameConfig}. \\
+Deleted & none & -- & No files were removed. \\
+\bottomrule
+\end{tabularx}
+\caption{Source files added and changed from Stage 1 to Stage 2 (157 lines added, 8 removed)}
+\end{table}
+
+Most of this is the kind of small registration and setup change the brief says to expect: \texttt{GameConfig},
+\texttt{GameView} and \texttt{RestaurantRush} only learn that a stage number exists and which customer arrives when.
+The one change to an existing rule class is the \texttt{onServed()} hook in \texttt{Customer} and the matching call in
+\texttt{Waiter.serve()}. We added it because the Critic's reaction depends on how long the food took, and the
+cleanest place to find that out is the moment the dish is served. It is a no-op for Regular and VIP customers,
+so their behaviour is unchanged. \texttt{GameController.java} is not in the diff at all: it still calls
+\texttt{getSatisfactionLoss()}, \texttt{applyDiscount()} and \texttt{chooseItem()} on whatever \texttt{Customer}
+it holds, and the subclass decides what happens.
+
+\subsection{Stage 2 $\rightarrow$ Stage 3}
+
+Compare link:
+\begin{center}{\small\url{https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush/compare/stage-2...stage-3}}\end{center}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l l r X}
+\toprule
+\textbf{Change} & \textbf{File} & \textbf{+/$-$} & \textbf{Why it was needed} \\
+\midrule
+New & \texttt{Host.java} & 33/0 & A new \texttt{Staff} subclass whose \texttt{seat()} returns an \texttt{ActionResult}, like the Waiter's. \\
+New & \texttt{ComboMeal.java} & 43/0 & Implements \texttt{OrderItem}; two \texttt{MenuItem}s, prep units summed, price 90\% of the sum rounded to the nearest cent. \\
+New & \texttt{HappyHour.java} & 53/0 & The one-off pricing policy: used or not, turns remaining, the 20\% discount and the +15 recovery amount. \\
+Changed & \texttt{Menu.java} & 31/2 & \texttt{Menu(boolean includeCombos)} builds the six combos; adds \texttt{getCombos()}, \texttt{hasCombos()} and \texttt{getItems()}. \\
+Changed & \texttt{Customer.java} & 14/1 & \texttt{pickDefault()} gives a 30\% seeded chance of a combo when the menu has combos; adds \texttt{recoverSatisfaction()}. \\
+Changed & \texttt{CriticCustomer.java} & 2/1 & Comment only: explains that a Critic never orders a combo. \\
+Changed & \texttt{Waiter.java} & 10/3 & \texttt{takeOrder()} takes the \texttt{HappyHour} (null below Stage~3) and applies it after the customer's own discount, before the price is locked into the \texttt{Order}. \\
+Changed & \texttt{GameConfig.java} & 12/0 & \texttt{hasHost()}, \texttt{hasHappyHour()} and \texttt{hasCombos()}, so each stage switches on only its own features. \\
+Changed & \texttt{GameController.java} & 83/4 & Creates the Host and Happy Hour for Stage~3, adds \texttt{happyHourStart()} and \texttt{hostTurn()}, and calls \texttt{happyHour.endTurn()} at the end of the turn. \\
+Changed & \texttt{GameView.java} & 33/2 & Stage~3 menu line, Happy Hour prompt and status line (turns left), recovery message, combos in the menu list. \\
+Changed & \texttt{RestaurantRush.java} & 1/1 & \texttt{askStage(3)} instead of \texttt{askStage(2)}. \\
+Deleted & none & -- & No files were removed. \\
+\bottomrule
+\end{tabularx}
+\caption{Source files added and changed from Stage 2 to Stage 3 (315 lines added, 14 removed)}
+\end{table}
+
+Again, \texttt{GameConfig}, \texttt{RestaurantRush}, the \texttt{Menu} constructor flag and the new view prompts are
+setup changes. The real rule changes are three, and each one is something Stage~3 asks for:
+\begin{itemize}[leftmargin=*]
+\item \textbf{\texttt{GameController}} gained two new phases. The six steps keep their order; Stage~3 only inserts the
+Happy Hour step at the start of the turn and the Host step just before the Waiter. The two new methods sit next to the
+existing step methods instead of being mixed into them.
+\item \textbf{\texttt{Waiter.takeOrder()}} is where the price is locked, so it is the only correct place to apply Happy Hour.
+The customer discount is still applied first, which gives the brief's example of $\$15 \times 0.9 \times 0.8 = \$10.80$.
+\item \textbf{\texttt{Customer.pickDefault()}} needed the combo rule. The combo branch is only entered when
+\texttt{menu.hasCombos()} is true, so in Stages~1 and~2 the seeded random generator is called exactly as before and the
+same seed still gives the same dishes. The replay check below confirms this.
+\end{itemize}
+
+\subsection{What Stayed the Same, and How We Checked}
+
+Thirteen of the twenty Stage~1 source files are byte-for-byte identical at \texttt{stage-3}:
+\texttt{ActionResult}, \texttt{Cashier}, \texttt{Chef}, \texttt{CustomerState}, \texttt{MenuItem}, \texttt{Order},
+\texttt{OrderItem}, \texttt{OrderStatus}, \texttt{RegularCustomer}, \texttt{Restaurant}, \texttt{Staff}, \texttt{Table}
+and \texttt{WaitingQueue}. \texttt{VIPCustomer} is also unchanged from Stage~2 to Stage~3. So the order lifecycle,
+the Cashier's timing (one payment per turn, oldest first, never on the turn a customer becomes \texttt{READY\_TO\_PAY}),
+satisfaction loss, abandonment and the victory check were not edited after Stage~1.
+
+Not editing a file does not prove the behaviour is unchanged, because the controller calls it differently, so we also
+replayed the old runs on the final build. We extracted the \texttt{stage-3} snapshot into a clean folder, compiled it,
+and fed it each Stage~1 input script with \texttt{--echo}, choosing Stage~1 and seed~42. The scripts at \texttt{stage-3}
+are the \texttt{stage-1} scripts with one extra first line (\texttt{1}) to answer the stage menu, which did not exist
+in Stage~1. We then compared the output with the transcript recorded at the \texttt{stage-1} tag, ignoring only the
+stage menu and the banner line that now names the stage. We did the same for the Stage~2 scripts against the
+\texttt{stage-2} recordings.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l l l X}
+\toprule
+\textbf{Script} & \textbf{Recorded at} & \textbf{Replayed on} & \textbf{Result} \\
+\midrule
+\texttt{stage1-victory} & \texttt{stage-1} & \texttt{stage-3} & Identical. Victory: 5 paid, \$63.00, average 74.4. \\
+\texttt{stage1-defeat} & \texttt{stage-1} & \texttt{stage-3} & Identical. Defeat: 0 paid, \$0.00, 2 unhappy departures. \\
+\texttt{stage1-invalid-input} & \texttt{stage-1} & \texttt{stage-3} & Identical, including every ``explain and ask again'' message. \\
+\texttt{stage2-victory} & \texttt{stage-2} & \texttt{stage-3} & Identical, including the VIP's discounted bill and the Critic's reaction. \\
+\texttt{stage2-defeat} & \texttt{stage-2} & \texttt{stage-3} & Identical. \\
+\bottomrule
+\end{tabularx}
+\caption{Replaying earlier runs on the final build}
+\end{table}
+
+Every turn of these games, including the customers' choices of food, came out the same, so the Stage~3 changes did
+not leak into the earlier stages. The exact commands are in \texttt{TESTING.md}.
+
+\subsection{How the Stage 1 Design Took the Later Requirements}
+
+We did not know the exact Stage~2 and Stage~3 rules when we first sketched the classes, but we did know that
+customer types and menu items were the parts most likely to grow. Three early decisions paid off.
+Making \texttt{Customer} abstract meant VIP and Critic were two new subclasses, and \texttt{GameController} did not
+change at all in Stage~2. Having \texttt{Order} depend on the \texttt{OrderItem} interface rather than on
+\texttt{MenuItem} meant a \texttt{ComboMeal} could be ordered, cooked and paid for with no change to \texttt{Order},
+\texttt{Chef} or \texttt{Cashier}. And because every staff action returns an \texttt{ActionResult}, the \texttt{Host}
+reuses the same ``explain why it failed and ask again'' handling as the Waiter instead of needing its own error path.
+
+The place that did grow is \texttt{GameController}, by 83 lines in Stage~3, since it has to schedule the new phases.
+We accepted this because the turn order belongs in one place and the new phases are separate methods. We also missed
+one thing: the \texttt{onServed()} hook was not in our Stage~1 \texttt{Customer}, so Stage~2 had to add it. If we had
+listed ``events a customer might react to'' when designing Stage~1, that change would not have been needed.
+
+% ============================================================
+% 5. FUNCTIONAL EVIDENCE
+% ============================================================
+\newpage

@@ -1,0 +1,312 @@
+\section{Functional Evidence}
+\label{sec:functional}
+
+\lstdefinestyle{run}{basicstyle=\ttfamily\scriptsize,columns=fixed,breaklines=true,frame=single,backgroundcolor=\color{codebg}}
+
+Everything in this section is copied from transcripts produced by the submitted
+Stage~3 build. We did not edit the console output, apart from cutting long stretches,
+which are marked with \texttt{[...]}. Each run is stored in the repository under
+\texttt{test-runs/} as a pair of files. The \texttt{.txt} file holds the exact keyboard
+input: the stage, the seed, then one line per choice. The \texttt{.out} file is the
+transcript we recorded. A TA can replay any run with:
+
+\begin{lstlisting}[style=run]
+javac -d bin src/restaurantrush/*.java
+java -cp bin restaurantrush.RestaurantRush --echo < test-runs/stage1-victory.txt
+\end{lstlisting}
+
+\texttt{--echo} prints each input after its prompt, so the replay reads like a live
+game. If an input file ends early, every remaining prompt takes its last option (Wait,
+Back or ``n''), so the game still plays all 18 turns. \texttt{TESTING.md} in the
+repository describes each run in more detail.
+
+\subsection{Summary of reproducible runs}
+
+All runs use the base setting from the brief: 18 turns, 2 tables, one Waiter, one Chef
+and one Cashier, with arrivals on turns 1, 4, 7, 10, 13 and 16. Stage~3 adds the Host.
+The ``victory'' runs follow one simple rule each turn. The Waiter serves a READY dish if
+there is one; otherwise takes an order; otherwise seats someone. The Chef always works on
+the oldest unfinished order. The ``defeat'' runs use the same Waiter, but the Chef never
+cooks.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Reproducible runs (all numbers taken from the final screen of each \texttt{.out} file)}
+\label{tab:runs}
+\begin{tabular}{@{}c c l l c r c@{}}
+\toprule
+Stage & Seed & Input file (\texttt{test-runs/}) & Result & Paid & Revenue & Avg sat. \\
+\midrule
+1 & 42 & \texttt{stage1-victory.txt}                  & Victory & 5 & \$63.00 & 74.4 \\
+1 & 42 & \texttt{stage1-defeat.txt}                   & Defeat  & 0 & \$0.00  & N/A  \\
+1 & 42 & \texttt{stage1-invalid-input.txt}            & Defeat  & 1 & \$18.00 & 76.0 \\
+2 & 42 & \texttt{stage2-victory.txt}                  & Victory & 4 & \$53.10 & 76.3 \\
+2 & 42 & \texttt{stage2-defeat.txt}                   & Defeat  & 0 & \$0.00  & N/A  \\
+2 & 42 & \texttt{extra-critic-slow-service.txt}       & Victory & 4 & \$53.10 & 76.3 \\
+3 & 42 & \texttt{stage3-victory.txt}                  & Victory & 5 & \$88.45 & 83.2 \\
+3 & 42 & \texttt{stage3-defeat.txt}                   & Defeat  & 0 & \$0.00  & N/A  \\
+3 & 42 & \texttt{stage3-happy-hour-after-payment.txt} & Victory & 5 & \$88.74 & 87.6 \\
+3 & 1  & \texttt{stage3-vip-happy-hour-seed1.txt}     & Victory & 5 & \$73.80 & 91.4 \\
+3 & 42 & \texttt{extra-host-and-waiter-seat.txt}      & Defeat  & 0 & \$0.00  & N/A  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \texttt{invalid-input} and \texttt{extra-*} runs exist to show one specific behaviour.
+They stop giving real choices after a few turns, so their final results are not
+meaningful. No victory run has more than five paid customers. This matches the note in
+the brief: the customer who arrives on turn 16 cannot pay within 18 turns.
+
+\subsection{Start-of-turn display}
+
+The brief asks for the turn number, revenue, the average satisfaction of paid customers,
+the queue, the occupied tables, each customer's satisfaction, order status, and the staff
+tasks. All of these appear at the top of every turn. In Stage~3, the Happy Hour status
+and the Host are also shown. Any Happy Hour recovery is applied first, so the table
+shows the satisfaction after the +15 (\texttt{stage3-victory.out}, turn 8):
+
+\begin{lstlisting}[style=run]
+========================================================================
+ TURN 8 / 18     Revenue: $9.00     Avg satisfaction (paid): 92.0
+========================================================================
+  * Happy Hour: VIP #3 cheers up, satisfaction 95 -> 100.
+ Happy Hour: ACTIVE, 1 turn(s) left including this one (20% off new orders, waiting customers +15)
+ Waiting queue:
+   (empty)
+ Tables:
+   Table 1: VIP #3 [satisfaction 100, ORDERED]
+            order: COOKING 1/2 units, $15.55
+   Table 2: Regular #2 [satisfaction 84, READY_TO_PAY]
+            order: READY_TO_PAY 2/2 units, $21.60
+ Staff on duty:
+   Host Hana        seat one waiting customer (in addition to the Waiter)
+   Waiter Wendy     one task: seat, take an order or serve a READY dish
+   Chef Carlos      one preparation unit on one order
+   Cashier Cathy    automatic, collects one payment per turn
+\end{lstlisting}
+
+At the end of each turn, the game prints the served count, unhappy departures, revenue,
+average satisfaction and turns used:
+
+\begin{lstlisting}[style=run]
+ End of turn 8: served 2 | unhappy departures 0 | revenue $30.60
+                 avg satisfaction (paid) 88.0 | turns used 8/18
+\end{lstlisting}
+
+\subsection{Invalid choices are explained and do not use up the task}
+
+In \texttt{stage1-invalid-input.out}, the manager types text, then an out-of-range
+number, then two actions that are impossible on turn 1. The Waiter's menu reappears
+every time, and the turn continues only after a valid action:
+
+\begin{lstlisting}[style=run]
+ Waiter Wendy - choose one task:
+   1. Seat a waiting customer
+   2. Take an order
+   3. Serve a READY dish
+   4. Wait
+ Choice > abc
+  ! Please enter a number from 1 to 4.
+ Choice > 9
+  ! Please enter a number from 1 to 4.
+ Choice > 3
+  ! Not possible: There are no orders in the kitchen. Choose again.
+ Waiter Wendy - choose one task:
+   [...]
+ Choice > 2
+  ! Not possible: No customer is seated yet. Choose again.
+\end{lstlisting}
+
+The reasons come from the \texttt{ActionResult} returned by \texttt{Waiter}, not from the
+view. The same run also tries to serve a half-cooked Pasta and to seat a customer at an
+occupied table:
+
+\begin{lstlisting}[style=run]
+ Serve which dish?
+   1. Pasta for Regular #1 - COOKING 1/2 units, $18.00
+   2. Back
+ Choice > 1
+  ! Not possible: Pasta for Regular #1 is not READY yet (1/2 units done). Choose again.
+ [...]
+  ! Not possible: Table 1 is occupied by Regular #1. Choose again.
+\end{lstlisting}
+
+\subsection{READY, SERVED, READY\_TO\_PAY, PAID: the worked example from the brief}
+
+The first six turns of \texttt{stage1-victory.out} repeat the example in Section~3.3 of
+the brief. Regular \#1 orders Pasta (2 units) and gets the manager's full attention. The
+customer's satisfaction at the end of turns 1--3 is 92, 84 and 76. It then stays at 76
+once the dish is served, and 76 is the value recorded at payment.
+
+\begin{lstlisting}[style=run]
+ TURN 2  * Waiter Wendy takes Regular #1's order: Pasta ($18.00).
+         * Chef Carlos works on Pasta for Regular #1 (1/2).
+ TURN 3  * Chef Carlos works on Pasta for Regular #1 (2/2) - READY, can be served from next turn.
+ TURN 4    Table 1: Regular #1 [satisfaction 76, ORDERED]
+                    order: READY 2/2 units, $18.00
+         * Waiter Wendy serves Pasta for Regular #1.
+ TURN 5    Table 1: Regular #1 [satisfaction 76, EATING]
+         * Regular #1 finishes eating and is READY_TO_PAY.
+ TURN 6  * Cashier Cathy collects $18.00 from Regular #1 (satisfaction recorded: 76). Table freed.
+\end{lstlisting}
+
+To save space, the excerpt above shows only the relevant lines of turns 2--6; each
+line is copied word for word. The ordering rules can all be seen here. The Chef cooks an
+order the Waiter took in the same turn (turn 2). A dish that becomes READY on turn 3
+cannot be served until turn 4. A customer who becomes READY\_TO\_PAY on turn 5 pays on
+turn 6, at the earliest.
+
+\subsection{Stage 2: VIP and Critic behaviour}
+
+\textbf{VIP pricing.} VIP \#3 orders a Salad, and the 10\% discount is locked into the
+order when it is taken (\texttt{stage2-victory.out}):
+
+\begin{lstlisting}[style=run]
+  * Waiter Wendy takes VIP #3's order: Salad (list $9.00, charged $8.10).
+  [...]
+  * Cashier Cathy collects $8.10 from VIP #3 (satisfaction recorded: 85). Table freed.
+\end{lstlisting}
+
+The VIP's satisfaction also drops more slowly: VIP \#3 lost 5 points per turn and was
+recorded at 85, while Regular \#1 and Regular \#2 in the same run lost 8 per turn and were
+recorded at 76.
+
+\textbf{Critic preference and reaction.} We documented that a Critic always orders the
+most expensive single dish (Pasta). A Critic gains 5 satisfaction if served within 2 turns
+of ordering and loses 10 if it takes 3 or more turns. Both cases appear in the
+transcripts:
+
+\begin{lstlisting}[style=run]
+stage2-victory.out (ordered turn 15, served turn 17):
+  * Waiter Wendy takes Critic #5's order: Pasta ($18.00).
+  [...]
+  * Waiter Wendy serves Pasta for Critic #5. Critic #5 reacts: satisfaction 52 -> 57.
+
+extra-critic-slow-service.out (same game, Waiter waits on turn 17, serves on turn 18):
+  * Waiter Wendy serves Pasta for Critic #5. Critic #5 reacts: satisfaction 40 -> 30.
+\end{lstlisting}
+
+The Critic arrives on turn 13 and is served too late to pay, so the slow-service run
+ends with the same result as the normal Stage~2 victory run. The Critic also
+loses satisfaction faster (12 per turn): it arrived at 100 and was at 52 four turns later,
+when the Pasta reached the table.
+
+\subsection{Stage 3: Host, ComboMeal and Happy Hour}
+
+\textbf{Host in addition to the Waiter.} In \texttt{extra-host-and-waiter-seat.out}, two
+customers are queuing on turn 4. The Host seats one, and the Waiter seats the other in the
+same turn:
+
+\begin{lstlisting}[style=run]
+ Host Hana - seat which customer?
+   1. Regular #1 [satisfaction 76, WAITING]
+   2. Regular #2 [satisfaction 100, WAITING]
+   3. Wait
+ Choice > 1
+ [...]
+  * Host Hana seats Regular #1 at Table 1.
+ [...]
+  * Waiter Wendy seats Regular #2 at Table 2.
+\end{lstlisting}
+
+\textbf{ComboMeal.} The Stage~3 menu lists all six combos. Each combo's price is 90\% of
+its two parts, rounded to the nearest cent, and its preparation units are the sum of its
+two parts. For example, $(\$9 + \$18) \times 0.9 = \$24.30$, with $1 + 2 = 3$ units.
+Customers in Stage~3 order a random combo 30\% of the time, using the seeded generator.
+
+\begin{lstlisting}[style=run]
+  Salad + Salad Combo          $16.20   2 prep unit(s)
+  Salad + Burger Combo         $21.60   2 prep unit(s)
+  Salad + Pasta Combo          $24.30   3 prep unit(s)
+  Burger + Burger Combo        $27.00   2 prep unit(s)
+  Burger + Pasta Combo         $29.70   3 prep unit(s)
+  Pasta + Pasta Combo          $32.40   4 prep unit(s)
+  [...]
+  * Waiter Wendy takes Regular #4's order: Salad + Pasta Combo ($24.30).
+\end{lstlisting}
+
+\textbf{Happy Hour.} The manager switches it on at the start of turn 7, before any staff
+act. It lasts for that turn and the next. The remaining duration is printed at the top of
+both turns: ``2 turn(s) left including this one'' on turn 7 and ``1 turn(s) left'' on
+turn 8 (see the start-of-turn display above). With seed 1, the VIP orders a Burger during Happy Hour. The
+VIP discount is applied first and Happy Hour second, giving exactly the brief's example of
+$\$15 \times 0.9 \times 0.8 = \$10.80$:
+
+\begin{lstlisting}[style=run]
+stage3-vip-happy-hour-seed1.out:
+  * Waiter Wendy takes VIP #3's order: Burger (list $15.00, charged $10.80).
+
+stage3-victory.out (combo for a VIP: $21.60 x 0.9 = $19.44, x 0.8 = $15.552 -> $15.55):
+  * Happy Hour is ON for this turn and the next: 20% off new orders.
+  [...]
+  * Waiter Wendy takes VIP #3's order: Salad + Burger Combo (list $21.60, charged $15.55).
+\end{lstlisting}
+
+\texttt{stage3-happy-hour-after-payment.out} checks the recovery rule. Happy Hour is
+switched on at turn 13. By then three customers have already paid, with recorded
+satisfaction 92, 84 and 90 (average 88.7). Only customers still waiting for a table or
+for food recover 15 points, on the activation turn and on the following turn. The paid
+average stays at 88.7 throughout (only the relevant lines of turns 13--15 are shown):
+
+\begin{lstlisting}[style=run]
+ TURN 13 / 18     Revenue: $50.04     Avg satisfaction (paid): 88.7
+  * Happy Hour is ON for this turn and the next: 20% off new orders.
+  * Happy Hour: Regular #4 cheers up, satisfaction 76 -> 91.
+ Happy Hour: ACTIVE, 2 turn(s) left including this one (20% off new orders, waiting customers +15)
+ TURN 14 / 18     Revenue: $50.04     Avg satisfaction (paid): 88.7
+  * Happy Hour: Critic #5 cheers up, satisfaction 88 -> 100.
+ Happy Hour: ACTIVE, 1 turn(s) left including this one (20% off new orders, waiting customers +15)
+ TURN 15 / 18     Revenue: $50.04     Avg satisfaction (paid): 88.7
+ Happy Hour: used
+\end{lstlisting}
+
+The final average of 87.6 equals $(92+84+90+91+81)/5$. These are the values recorded at
+each payment, so Happy Hour never changes a customer who has already paid. Orders placed
+before turn 13 keep their original prices. For example, Regular \#4's combo was ordered
+at \$24.30 and was still charged \$24.30.
+
+\subsection{Abandonment, Victory and Defeat}
+
+In the defeat runs the Chef never cooks. Satisfaction keeps falling by 8 per turn, and
+Regular \#1 leaves on turn 13 without paying. The leaving customer's order is cancelled
+and their table is freed (\texttt{stage1-defeat.out}):
+
+\begin{lstlisting}[style=run]
+  * Chef Carlos waits this turn.
+  * Regular #1 runs out of patience and leaves without paying.
+------------------------------------------------------------------------
+ End of turn 13: served 0 | unhappy departures 1 | revenue $0.00
+                 avg satisfaction (paid) N/A | turns used 13/18
+\end{lstlisting}
+
+The game always plays all 18 turns and then checks the three targets:
+
+\begin{lstlisting}[style=run]
+stage1-victory.out:
+  VICTORY! The restaurant hit every target.
+  Paid customers    5        (need 4)   [met]
+  Revenue           $63.00   (need $45.00)  [met]
+  Avg satisfaction  74.4     (need 60)  [met]
+  Unhappy departures: 0
+
+stage1-defeat.out:
+  DEFEAT. At least one target was missed.
+  Paid customers    0        (need 4)   [missed]
+  Revenue           $0.00    (need $45.00)  [missed]
+  Avg satisfaction  N/A      (need 60)  [missed]
+  Unhappy departures: 2
+\end{lstlisting}
+
+\textbf{The turn-16 customer.} The game says at the start that the customer arriving on
+turn 16 cannot finish paying in time. In \texttt{stage1-victory.out}, the best case for
+that customer is an order taken on turn 18 and a dish that becomes READY on the same turn.
+The game then ends with 5 of the 6 customers paid, as the brief expects:
+
+\begin{lstlisting}[style=run]
+(The customer arriving on turn 16 cannot finish paying in time - that is expected.)
+[...]
+  * Waiter Wendy takes Regular #6's order: Burger ($15.00).
+  [...]
+  * Chef Carlos works on Burger for Regular #6 (1/1) - READY, can be served from next turn.
+\end{lstlisting}
