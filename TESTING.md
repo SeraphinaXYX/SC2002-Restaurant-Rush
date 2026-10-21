@@ -29,6 +29,8 @@ the same Waiter but the Chef never cooks (and the Host waits), so no food reache
 | stage3-defeat | Host waits, Chef never cooks | Defeat: 0 paid |
 | stage3-vip-happy-hour-seed1 | seed 1, Happy Hour at turn 7: VIP #3 orders a Burger, charged $10.80 ($15 x 0.9 x 0.8), the example in the brief | Victory: 5 paid, $73.80, avg 91.4 |
 | stage3-happy-hour-after-payment | Three customers have already paid (recorded 92, 84, 90, average 88.7) when Happy Hour is switched on at turn 13. During both Happy Hour turns the average stays 88.7: only Regular #4 (still waiting for food, 76 -> 91) and Critic #5 (88 -> 100) recover, paid customers are never touched. Final average 87.6 = (92 + 84 + 90 + 91 + 81) / 5, i.e. exactly the values recorded at payment | Victory: 5 paid, $88.74, avg 87.6 |
+| extra-host-and-waiter-seat | Stage 3, seed 42. The Host waits for three turns so two people queue up; on turn 4 Host Hana seats Regular #1 at Table 1 and Waiter Wendy seats Regular #2 at Table 2 in the same turn. Later turns show the Host refusing with "nobody to seat" and "no free table". The Chef never cooks | Defeat: 0 paid, 2 departures |
+| extra-critic-slow-service | Stage 2, seed 42. The Critic's Pasta is ordered on turn 15 and only served on turn 18 (3 turns), so the Critic reacts 40 -> 30, the -10 penalty for slow service | Victory: 4 paid, $53.10, avg 76.3 |
 
 ## Checking that later stages did not break earlier rules
 

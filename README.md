@@ -19,7 +19,7 @@ Repository: https://github.com/SeraphinaXYX/SC2002-Restaurant-Rush
 
 ## Build and run
 
-Needs JDK 17 or newer, no other libraries and no network access.
+Needs JDK 17 or newer (it uses switch expressions, so Java 11 is not enough), no other libraries and no network access.
 
 Linux / macOS:
 ```
@@ -107,9 +107,14 @@ Changes from Stage 2 ([compare stage-2...stage-3](https://github.com/SeraphinaXY
 | `GameConfig.java` | `hasHost`, `hasHappyHour`, `hasCombos` | stage switches |
 | `GameController.java` | Host phase before the Waiter; Happy Hour prompt, recovery and `endTurn` | wiring of the new features |
 | `GameView.java` | Happy Hour prompt, status line and recovery message; combos in the menu listing | display only |
+| `Staff.java`, `Host.java`, `Waiter.java` | new protected `Staff.seatCustomer` used by both `Waiter.seat` and `Host.seat` | after review we noticed the two seat methods were copies of each other |
+| `Customer.java`, `RegularCustomer.java`, `VIPCustomer.java`, `CriticCustomer.java` | constructors no longer take the arrival turn | the field was never read |
+| `Order.java`, `WaitingQueue.java` | removed `getPrepDone` and `size` | unused |
 
-The combo rule only draws an extra random number when combos exist, so Stage 1 and 2 games
-(and their recorded runs) are unchanged in the Stage 3 build.
+Nothing was deleted. The combo rule only draws an extra random number when combos exist, so Stage 1 and 2 games
+(and their recorded runs) are unchanged in the Stage 3 build. The last commit on the `stage-3` tag is a tidy-up
+after our own code review: on Happy Hour turns the state is now printed after the +15 recovery, so the numbers
+on screen are the ones the turn really uses.
 
 ## Design overview
 
@@ -127,7 +132,7 @@ The combo rule only draws an extra random number when combos exist, so Stage 1 a
 | `OrderItem` / `MenuItem`, `ComboMeal` | interface, enum, class | anything that can be ordered |
 | `Menu`, `Order`, `Table`, `WaitingQueue`, `HappyHour` | entity | as named |
 
-Full diagrams and discussion are in the PDF report.
+Full diagrams and discussion are in the [PDF report](report/SC2002_Restaurant_Rush_Report.pdf).
 
 ## Reproducible runs
 
@@ -137,11 +142,24 @@ See [TESTING.md](TESTING.md). Each file in `test-runs/` is the exact input for o
 java -cp bin restaurantrush.RestaurantRush --echo < test-runs/stage3-victory.txt
 ```
 
-| Run | Result |
-|-----|--------|
-| stage1-victory / stage1-defeat | Victory 5 paid, $63.00, avg 74.4 / Defeat 0 paid |
-| stage2-victory / stage2-defeat | Victory 4 paid, $53.10, avg 76.3 / Defeat 0 paid |
-| stage3-victory / stage3-defeat | Victory 5 paid, $88.45, avg 83.2 / Defeat 0 paid |
+| Run | What it shows | Result |
+|-----|---------------|--------|
+| stage1-victory | the Pasta example from the brief (92 / 84 / 76, paid $18.00 on turn 6) | Victory: 5 paid, $63.00, avg 74.4 |
+| stage1-defeat | Chef never cooks, two customers walk out | Defeat: 0 paid, $0.00 |
+| stage1-invalid-input | rejected choices print the reason and ask again | Defeat: 1 paid, $18.00, avg 76.0 |
+| stage2-victory | VIP pays $8.10 for a Salad, Critic reacts +5 to quick service | Victory: 4 paid, $53.10, avg 76.3 |
+| stage2-defeat | same as stage 1 defeat with VIP and Critic | Defeat: 0 paid, $0.00 |
+| stage3-victory | Host, combo meals, Happy Hour from turn 7 | Victory: 5 paid, $88.45, avg 83.2 |
+| stage3-defeat | Host waits, Chef never cooks | Defeat: 0 paid, $0.00 |
+| stage3-vip-happy-hour-seed1 | VIP Burger during Happy Hour: $10.80 (seed 1) | Victory: 5 paid, $73.80, avg 91.4 |
+| stage3-happy-hour-after-payment | Happy Hour does not touch customers who already paid | Victory: 5 paid, $88.74, avg 87.6 |
+| extra-host-and-waiter-seat | turn 4: Host seats Regular #1 and the Waiter seats Regular #2 in the same turn | Defeat: 0 paid (Chef never cooks) |
+| extra-critic-slow-service | Critic ordered on turn 15, served on turn 18, reacts 40 -> 30 | Victory: 4 paid, $53.10, avg 76.3 |
+
+## Report
+
+The PDF report (class diagram, sequence diagram, design discussion, functional evidence and
+reflections) is in [report/SC2002_Restaurant_Rush_Report.pdf](report/SC2002_Restaurant_Rush_Report.pdf).
 
 ## Video timestamps
 
@@ -158,7 +176,8 @@ java -cp bin restaurantrush.RestaurantRush --echo < test-runs/stage3-victory.txt
 ## Project structure
 
 ```
-src/restaurantrush/   Java source (one package)
+src/restaurantrush/   Java source (one package, 25 files)
 test-runs/            input files and transcripts for reproducible games
 TESTING.md            what each run demonstrates
+report/               PDF report
 ```
